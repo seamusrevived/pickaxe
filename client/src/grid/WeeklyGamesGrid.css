@@ -13,6 +13,7 @@
     padding-right: 6px;
     text-align: right;
     line-height: 17px;
+    transition: background-color 0.25s;
 }
 
 .grid__cell--left-border {
