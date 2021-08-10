@@ -42,7 +42,7 @@ function generateRewindWeekCallback(data, currentWeek, updateWeek, refetch) {
 
 function generateWebsocketOnOpenCallback(refetch) {
     return () => {
-        refetch().catch(err => {
+        refetch()?.catch(err => {
             console.warn(`Refetch failed ${err}`)
         })
     };
@@ -119,8 +119,8 @@ const WeeklyViewApp = props => {
                     games={loadedData?.games}
                     totals={loadedData?.userTotals}
                     userPicks={loadedData.userPicks}
-                />,
-                isLoadingData ? <div data-testid="loading-spinner" key="loading-spinner">loading</div> : null
+                    isLoading={isLoadingData}
+                />
             ]
         }
     </div>

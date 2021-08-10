@@ -84,8 +84,9 @@ const WeeklyGamesGrid = props => {
         spreadsColumn,
         userPicksGrid,
         resultsColumn,
-        totalsRow
-    ];
+        totalsRow,
+        props.isLoading ? <div data-testid="loading-spinner" key="loading-spinner"/> : null
+        ];
 
     const gridStyleColumns = {
         gridTemplateColumns: `repeat(${nTotalColumns}, 6.5em)`

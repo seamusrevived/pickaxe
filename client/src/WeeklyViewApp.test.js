@@ -129,14 +129,14 @@ describe('WeeklyViewApp', () => {
             })
         });
 
-        it('spinner does not show when completed load', () => {
+        it('grid is set as not loading when completed load', () => {
             act(() => {
                 week0Change.props.forward();
             })
 
-            const spinner = app.findAllByProps({"data-testid": "loading-spinner"});
+            const grid = app.findByProps({"data-testid": "weekly-games-grid"});
 
-            expect(spinner.length).toBe(0);
+            expect(grid.props.isLoading).toBe(false);
         });
 
 
@@ -307,14 +307,14 @@ describe('WeeklyViewApp', () => {
         });
 
 
-        it('advancing week shows spinner while not completed load', () => {
+        it('advancing week sets grid to loading before completed load', () => {
             act(() => {
                 week0Change.props.forward();
             })
 
-            const spinner = weeklyViewApp.root.findAllByProps({"data-testid": "loading-spinner"});
+            const grid =  weeklyViewApp.root.findByProps({"data-testid": "weekly-games-grid"});
 
-            expect(spinner.length).toBe(1);
+            expect(grid.props.isLoading).toBe(true);
         });
 
     });
