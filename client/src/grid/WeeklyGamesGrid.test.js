@@ -591,4 +591,38 @@ describe('WeeklyGamesGrid', () => {
         });
 
     });
+
+    describe('spinner', () => {
+        it('does not show spinner when not loading', () => {
+            const grid = create(<WeeklyGamesGrid
+                currentWeek="0"
+                users={mockQueryData.users}
+                games={mockQueryData.games}
+                userPicks={mockQueryData.userPicks}
+                totals={mockQueryData.userTotals}
+                isLoading={false}
+            />).root;
+
+
+            const spinner = grid.findAllByProps({"data-testid": "loading-spinner"})
+
+            expect(spinner.length).toEqual(0)
+        });
+
+        it('shows spinner when loading', () => {
+            const grid = create(<WeeklyGamesGrid
+                currentWeek="0"
+                users={mockQueryData.users}
+                games={mockQueryData.games}
+                userPicks={mockQueryData.userPicks}
+                totals={mockQueryData.userTotals}
+                isLoading={true}
+            />).root;
+
+
+            const spinner = grid.findByProps({"data-testid": "loading-spinner"})
+
+            expect(spinner).toBeTruthy()
+        });
+    })
 });

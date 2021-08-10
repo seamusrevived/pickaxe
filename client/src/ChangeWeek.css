@@ -1,26 +1,37 @@
 .change-week {
-    margin-left: 256px;
-    display: inline-block;
-    margin-top: 16px;
-    margin-bottom: 8px;
-    text-align: center;
-}
-
-.change-week__element {
     display: inline-block;
     text-align: center;
-    height: 32px;
+    width: auto;
 }
 
-.change-week__element--week {
+.change-week__container {
+    margin: 24px 0 16px 16em;
+    display: flex;
+    align-items: center;
+}
+
+.change-week__button {
+    transition: fill 1s;
+    height: 36px;
+}
+
+.change-week__button:hover {
+    fill:  #4adb2a;
+    transition: fill 0.25s;
+}
+
+.change-week__button:active {
+    fill:  #FF0000;
+    transition: fill 0.25s;
+}
+
+.change-week__week {
     width: 6em;
     font-weight: bold;
-    vertical-align: top;
-    padding-top: 4px;
     font-size: 24px;
     font-family: sans-serif;
 }
 
-.change-week__element--back {
+.change-week__button--back {
     transform: rotate(180deg);
 }

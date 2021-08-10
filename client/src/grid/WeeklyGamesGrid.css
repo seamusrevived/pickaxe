@@ -1,5 +1,6 @@
 .grid {
     display: grid;
+    position: relative;
     margin-top: 16px;
 }
 
@@ -12,6 +13,7 @@
     padding-right: 6px;
     text-align: right;
     line-height: 17px;
+    transition: background-color 0.25s;
 }
 
 .grid__cell--left-border {
@@ -35,4 +37,30 @@
 
 .grid__cell--correct-pick {
     background-color: #4adb2a;
+}
+
+.spinner {
+    position: absolute;
+    top: 120px;
+    width: 10em;
+    height: 10em;
+    animation: spinner-rotation 1.5s ease infinite, spinner-fade-in 0.25s ease;
+}
+
+@keyframes spinner-rotation {
+    from {
+        transform: rotateZ(0)
+    }
+    to {
+        transform: rotateZ(360deg)
+    }
+}
+
+@keyframes spinner-fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 100%;
+    }
 }

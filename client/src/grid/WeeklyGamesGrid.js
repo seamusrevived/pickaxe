@@ -6,6 +6,7 @@ import RowCells from "./RowCells";
 import HeaderRow from "./HeaderRow";
 import UserPicksGrid from "./UserPicksGrid";
 import "./WeeklyGamesGrid.css"
+import {ReactComponent as Spinner} from "./spinner.svg";
 
 const composeSendDataForWeek = (week, sendData) => {
     return (userName, gameName, updatedPick) => sendData({
@@ -78,18 +79,31 @@ const WeeklyGamesGrid = props => {
                                 row={gameNames.length + nHeaderRows + 1}
                                 leftBorder/>;
 
-    const grid = [
-        headerRow,
-        gamesColumn,
-        spreadsColumn,
-        userPicksGrid,
-        resultsColumn,
-        totalsRow
-    ];
-
     const gridStyleColumns = {
         gridTemplateColumns: `repeat(${nTotalColumns}, 6.5em)`
     };
+
+    const spinnerStyle = {
+        left: `${nTotalColumns * 6.5 / 2 - 5}em`
+    };
+
+    const grid = [
+            headerRow,
+            gamesColumn,
+            spreadsColumn,
+            userPicksGrid,
+            resultsColumn,
+            totalsRow,
+            props.isLoading
+                ? <Spinner data-testid="loading-spinner"
+                           key="loading-spinner"
+                           className="spinner"
+                           style={spinnerStyle}
+                           src="pickaxe/spinner.svg"/>
+                : null
+        ]
+    ;
+
 
     return <div className="grid" style={gridStyleColumns}>{grid}</div>;
 }
