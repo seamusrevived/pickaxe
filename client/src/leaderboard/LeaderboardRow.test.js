@@ -7,7 +7,7 @@ describe('LeaderboardRow', () => {
     it('renders name', () => {
         const row = create(<LeaderboardRow name={name} weeks={0} picks={0}/>).root;
 
-        const nameCell = row.find(el => el.props['data-testid'] === `leaderboard-row-name-${name}`);
+        const nameCell = row.findByProps({"data-testid": `leaderboard-row-name-${name}`})
 
         expect(nameCell.children[0]).toBe(name)
     });
@@ -15,7 +15,7 @@ describe('LeaderboardRow', () => {
     it('name has left border', () => {
         const row = create(<LeaderboardRow name={name} weeks={0} picks={0}/>).root;
 
-        const nameCell = row.find(el => el.props['data-testid'] === `leaderboard-row-name-${name}`);
+        const nameCell = row.findByProps({"data-testid": `leaderboard-row-name-${name}`})
         const classes = nameCell.props.className.split(" ");
 
         expect(classes.includes("leaderboard__cell--left-border")).toBeTruthy();
@@ -24,21 +24,21 @@ describe('LeaderboardRow', () => {
     it('renders different name', () => {
         const name = "Ogo";
         const row = create(<LeaderboardRow name={name} weeks={0} picks={0}/>).root;
-        const nameCell = row.find(el => el.props['data-testid'] === `leaderboard-row-name-${name}`);
+        const nameCell = row.findByProps({"data-testid": `leaderboard-row-name-${name}`})
 
         expect(nameCell.children[0]).toBe(name)
     });
 
     it('renders weeks of 0', () => {
         const row = create(<LeaderboardRow name={name} weeks={0} picks={0}/>).root;
-        const weeksCell = row.find(el => el.props['data-testid'] === `leaderboard-row-weeks-${name}`);
+        const weeksCell = row.findByProps({"data-testid": `leaderboard-row-weeks-${name}`})
 
         expect(weeksCell.children[0]).toBe("0")
     });
 
     it('renders weeks of 1', () => {
         const row = create(<LeaderboardRow name={name} weeks={1} picks={0}/>).root;
-        const weeksCell = row.find(el => el.props['data-testid'] === `leaderboard-row-weeks-${name}`);
+        const weeksCell = row.findByProps({"data-testid": `leaderboard-row-weeks-${name}`})
 
         expect(weeksCell.children[0]).toBe("1")
     });
@@ -46,7 +46,7 @@ describe('LeaderboardRow', () => {
     it('weeks does not have left border', () => {
         const row = create(<LeaderboardRow name={name} weeks={0} picks={0}/>).root;
 
-        const weeksCell = row.find(el => el.props['data-testid'] === `leaderboard-row-weeks-${name}`);
+        const weeksCell = row.findByProps({"data-testid": `leaderboard-row-weeks-${name}`})
         const classes = weeksCell.props.className.split(" ");
 
         expect(classes.includes("leaderboard__cell--left-border")).toBeFalsy();
@@ -54,14 +54,14 @@ describe('LeaderboardRow', () => {
 
     it('renders picks of 0', () => {
         const row = create(<LeaderboardRow name={name} weeks={0} picks={0}/>).root;
-        const picksCell = row.find(el => el.props['data-testid'] === `leaderboard-row-picks-${name}`);
+        const picksCell = row.findByProps({"data-testid": `leaderboard-row-picks-${name}`})
 
         expect(picksCell.children[0]).toBe("0")
     });
 
     it('renders picks of 1', () => {
         const row = create(<LeaderboardRow name={name} weeks={0} picks={1}/>).root;
-        const picksCell = row.find(el => el.props['data-testid'] === `leaderboard-row-picks-${name}`);
+        const picksCell = row.findByProps({"data-testid": `leaderboard-row-picks-${name}`})
 
         expect(picksCell.children[0]).toBe("1")
     });
@@ -69,7 +69,7 @@ describe('LeaderboardRow', () => {
     it('picks does not have left border', () => {
         const row = create(<LeaderboardRow name={name} weeks={0} picks={0}/>).root;
 
-        const picksCell = row.find(el => el.props['data-testid'] === `leaderboard-row-picks-${name}`);
+        const picksCell = row.findByProps({"data-testid": `leaderboard-row-picks-${name}`})
         const classes = picksCell.props.className.split(" ");
 
         expect(classes.includes("leaderboard__cell--left-border")).toBeFalsy();

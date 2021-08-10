@@ -154,8 +154,8 @@ describe('WeeklyGamesGrid', () => {
             let spreadHeader = null;
             let resultHeader = null;
             beforeEach(() => {
-                spreadHeader = grid.find(el => el.props["data-testid"] === "spread-header");
-                resultHeader = grid.find(el => el.props["data-testid"] === "result-header");
+                spreadHeader = grid.findByProps({"data-testid": "spread-header"})
+                resultHeader = grid.findByProps({"data-testid": "result-header"})
             })
 
             it('has spread header in row 1', () => {
@@ -224,10 +224,7 @@ describe('WeeklyGamesGrid', () => {
             });
 
             it('has result header in column 5', () => {
-                const resultHeader = twoUserGrid.find(el =>
-                    el.props["data-testid"] === "result-header"
-                );
-
+                const resultHeader = twoUserGrid.findByProps({"data-testid": "result-header"})
                 expect(resultHeader.props.style.gridColumn).toEqual(5)
             })
         });
