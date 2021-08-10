@@ -73,6 +73,7 @@ const WeeklyViewApp = props => {
     const {defaultWeek} = props;
     const [selectedWeek, updateWeek] = useState(defaultWeek);
     const [loadedData, updateLoadedData] = useState(null);
+    const [isLoadingData, setIsLoadingData] = useState(true);
 
     const {error, data, refetch} = useQuery(PICKS_QUERY, {
         variables: {week: selectedWeek},
@@ -83,6 +84,9 @@ const WeeklyViewApp = props => {
     useEffect(() => {
         if(!!data) {
             updateLoadedData(data);
+            setIsLoadingData(false);
+        } else {
+            setIsLoadingData(true);
         }
     }, [data]);
 
@@ -99,7 +103,7 @@ const WeeklyViewApp = props => {
     const rewindWeek = generateRewindWeekCallback(loadedData, selectedWeek, updateWeek, refetch);
 
 
-    return <div className="weekly-view-app">
+    return <div className="weekly-view-app" key="weekly-view-app">
         {error ? "Error" : !loadedData ? "Waiting for data..." :
             [
                 <Leaderboard key="leaderboard" data={loadedData.leaders}/>,
@@ -115,7 +119,8 @@ const WeeklyViewApp = props => {
                     games={loadedData?.games}
                     totals={loadedData?.userTotals}
                     userPicks={loadedData.userPicks}
-                />
+                />,
+                isLoadingData ? <div data-testid="loading-spinner" key="loading-spinner">loading</div> : null
             ]
         }
     </div>

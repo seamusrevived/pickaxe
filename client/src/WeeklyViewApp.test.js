@@ -129,6 +129,16 @@ describe('WeeklyViewApp', () => {
             })
         });
 
+        it('spinner does not show when completed load', () => {
+            act(() => {
+                week0Change.props.forward();
+            })
+
+            const spinner = app.findAllByProps({"data-testid": "loading-spinner"});
+
+            expect(spinner.length).toBe(0);
+        });
+
 
         it('twice on week 0 refetches with week 2', () => {
             act(() => {
@@ -258,37 +268,55 @@ describe('WeeklyViewApp', () => {
         });
     })
 
-
-    it('advancing week does not discard current data', () => {
-        jest.resetAllMocks();
-        refetchSpy = jest.fn();
-        refetchSpy.mockReturnValue(Promise.resolve())
-
-        useQuery
-            .mockReturnValueOnce({
-                loading: false, error: null, data: mockQueryData, refetch: refetchSpy
-            })
-            .mockReturnValue({
-                loading: true, error: null, data: null, refetch: refetchSpy
-            })
-        ;
-        useMutation.mockReturnValue([() => {
-        }]);
-
+    describe('persistence in loading', () => {
+        let week0Change = null;
         let weeklyViewApp = null;
-        act(() => {
-            weeklyViewApp = create(<WeeklyViewApp defaultWeek="0"/>);
+
+        beforeEach(() => {
+            jest.resetAllMocks();
+            refetchSpy = jest.fn();
+            refetchSpy.mockReturnValue(Promise.resolve())
+
+            useQuery
+                .mockReturnValueOnce({
+                    loading: false, error: null, data: mockQueryData, refetch: refetchSpy
+                })
+                .mockReturnValue({
+                    loading: true, error: null, data: null, refetch: refetchSpy
+                })
+            ;
+            useMutation.mockReturnValue([() => {
+            }]);
+
+            act(() => {
+                weeklyViewApp = create(<WeeklyViewApp defaultWeek="0"/>);
+            })
+
+            week0Change = weeklyViewApp.root.findByProps({id: "change-week"});
         })
 
-        let week0Change = weeklyViewApp.root.findByProps({id: "change-week"});
 
-        act(() => {
-            week0Change.props.forward();
-        })
+        it('advancing week does not discard current data', () => {
+            act(() => {
+                week0Change.props.forward();
+            })
 
-        week0Change = weeklyViewApp.root.findAllByProps({id: "change-week"});
+            week0Change = weeklyViewApp.root.findAllByProps({id: "change-week"});
 
-        expect(week0Change.length).toBe(1);
+            expect(week0Change.length).toBe(1);
+        });
+
+
+        it('advancing week shows spinner while not completed load', () => {
+            act(() => {
+                week0Change.props.forward();
+            })
+
+            const spinner = weeklyViewApp.root.findAllByProps({"data-testid": "loading-spinner"});
+
+            expect(spinner.length).toBe(1);
+        });
+
     });
 
     describe('leaderboard', () => {
