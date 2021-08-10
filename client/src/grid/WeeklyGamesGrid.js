@@ -1,17 +1,10 @@
-import LinearCells from "./LinearCells";
+import ColumnCells from "./ColumnCells";
 import UserPicksGrid from "./UserPicksGrid";
 import React from "react";
 import {useMutation} from "@apollo/react-hooks";
 import {UPDATE_PICKS_MUTATION} from "../graphqlQueries";
 import "./WeeklyGamesGrid.css"
-
-function blankCells(size) {
-    let blankArray = []
-    for (let i = 0; i < size; i++) {
-        blankArray.push("")
-    }
-    return blankArray
-}
+import RowCells from "./RowCells";
 
 const composeSendDataForWeek = (week, sendData) => {
     return (userName, gameName, updatedPick) => sendData({
@@ -35,53 +28,77 @@ const WeeklyGamesGrid = props => {
 
     const totalValues = props.totals?.map(totalData => totalData.total);
 
-    return [
-        <div key="grid-top-padding">
-            <div className='grid__cell grid__cell--name grid__cell--top-padding'/>
-            <div className='grid__cell grid__cell--name grid__cell--top-padding'/>
-            <LinearCells key="grid__cell--names"
-                         items={blankCells(userNames.length)} name="top-padding"
-            />
-            <div className='grid__cell grid__cell--name grid__cell--top-padding'/>
-        </div>,
-        <div key="grid-names">
-            <div className='grid__cell grid__cell--name grid__cell--border-bottom'/>
-            <div className='grid__cell grid__cell--name grid__cell--border-bottom'>Spread</div>
-            <LinearCells key="grid__cell--names"
-                         items={userNames} name="name"
-            />
-            <div className='grid__cell grid__cell--name grid__cell--border'>Result</div>
-        </div>,
-        <LinearCells key="game-cells"
-                     id="game-cells"
-                     items={gameNames} name="game"
+
+    const headerRow = [
+        <div className='grid__cell grid__cell--name grid__cell--no-right-border'
+             style={{gridRow: 1, gridColumn: 2}}
+             key="spread-header"
+             data-testid="spread-header"
+        >Spread</div>,
+        <RowCells key="grid__cell--names"
+                  items={userNames}
+                  name="name"
+                  row={1}
+                  columnOffset={3}
+                  topBorder
+                  leftBorder
         />,
-        <LinearCells key="spread-cells"
+        <div className='grid__cell grid__cell--name grid__cell--no-right-border'
+             style={{gridRow: 1, gridColumn: 3 + userNames.length}}
+             key="result-header"
+             data-testid="result-header"
+        >Result</div>
+    ];
+
+
+    const grid = [
+        ...headerRow,
+        <ColumnCells key="game-cells"
+                     id="game-cells"
+                     column={1}
+                     rowOffset={2}
+                     leftBorder
+                     topBorder
+                     alignLeft
+                     items={gameNames}
+                     name="game"
+        />,
+        <ColumnCells key="spread-cells"
                      className='grid__column'
-                     items={gameSpreads} name="spread"
+                     column={2}
+                     rowOffset={2}
+                     items={gameSpreads}
+                     name="spread"
         />,
         <UserPicksGrid id="user-picks-grid"
                        key="user-picks-grid"
                        users={props.users}
                        games={props.games}
                        userPicks={props.userPicks}
+                       columnOffset={3}
+                       rowOffset={2}
                        sendData={composeSendDataForWeek(props.currentWeek, sendData)}
         />,
-        <LinearCells key="result-cells"
-                     items={gameResults} name="result"
+        <ColumnCells key="result-cells"
+                     items={gameResults}
+                     name="result"
+                     column={3 + userNames.length}
+                     rowOffset={2}
         />,
-        <LinearCells key="right-padding-cells"
-                     items={blankCells(gameResults.length)} name="right-padding"
-        />,
-        <div key="grid-totals">
-            <div className='grid__cell grid__cell--total'/>
-            <div className='grid__cell grid__cell--total'/>
-            <LinearCells key="total-cells"
-                         items={totalValues} name="total"
-            />
-            <div className='grid__cell grid__cell--total grid__cell--border-left'/>
-        </div>
-    ]
+        <RowCells key="total-cells"
+                  items={totalValues}
+                  name="total"
+                  columnOffset={3}
+                  row={gameNames.length + 2}
+                  leftBorder
+        />
+    ];
+
+    const gridStyleColumns = {
+        gridTemplateColumns: `repeat(${3 + userNames.length}, 6.5em)`
+    };
+
+    return <div className="grid" style={gridStyleColumns}>{grid}</div>;
 }
 
 export default WeeklyGamesGrid
