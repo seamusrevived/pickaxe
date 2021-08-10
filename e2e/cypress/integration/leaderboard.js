@@ -20,9 +20,9 @@ describe('leaderboard', () => {
 
             .get(".leaderboard__cell--name", {timeout: 20000}).first().should('contain', 'Sereres')
 
-            .get(":nth-child(7) > .leaderboard__cell--name").should('contain', 'Seamus')
-            .get(":nth-child(7) > .leaderboard__cell--weeks").should('contain', '0')
-            .get(":nth-child(7) > .leaderboard__cell--picks").should('contain', '1')
+            .get(".leaderboard__cell--name").eq(2).should('contain', 'Seamus')
+            .get(".leaderboard__cell--weeks").eq(2).should('contain', '0')
+            .get(".leaderboard__cell--picks").eq(2).should('contain', '1')
 
             .get("#Seamus-GB\\@CHI")
             .click()
