@@ -3,7 +3,7 @@ import React from "react";
 const RowCells = props => {
     const {items, name, columnOffset, row, topBorder, leftBorder} = props;
     let cells = items.map((item, index) => {
-        let cssClass = "grid__cell ";
+        let cssClass = `grid__cell $grid__cell--${name}`;
 
         if(topBorder) {
             cssClass += "grid__cell--top-border "
