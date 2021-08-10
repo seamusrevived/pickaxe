@@ -1,20 +1,39 @@
 .leaderboard__container {
     margin-bottom: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, 6.5em);
 }
 
-.grid__cell--leader {
-    display: inline-block;
-    vertical-align: top;
+.leaderboard__cell {
+    height: 20px;
+    border-right: black 1px solid;
+    border-bottom: black 1px solid;
+    padding-top: 4px;
+    padding-left: 6px;
+    padding-right: 6px;
+    text-align: right;
+    line-height: 17px;
 }
 
-.leaderboard__row {
-
-}
-
-.leaderboard__row--numerical {
+.leaderboard__cell--numerical {
     text-align: right;
 }
 
-.leaderboard__row--name {
+.leaderboard__cell--name {
     text-align: left;
+}
+
+.leaderboard__cell--left-border {
+    border-left: black 1px solid;
+    margin-left: -1px;
+}
+
+.leaderboard__cell--top-border {
+    border-top: black 1px solid;
+    margin-top: -1px;
+}
+
+.leaderboard__cell--no-right-border {
+    border-right: none;
+    margin-right: -1px;
 }
