@@ -23,7 +23,11 @@ export default function PickCell(props) {
 
     };
 
-    let cssClass = 'grid__cell grid__cell--border'.concat( props.correct ? ' grid__cell--correct' : '')
+    let cssClass = `grid__cell ${props.correct ? 'grid__cell--correct-pick' : ''}`
+    let style = {
+      gridRow: props.row,
+      gridColumn: props.column
+    };
 
     return <div contentEditable={true}
                 spellCheck={false}
@@ -31,5 +35,6 @@ export default function PickCell(props) {
                 suppressContentEditableWarning="true"
                 id={props.id}
                 className={cssClass}
+                style={style}
     >{pickText}</div>
 }

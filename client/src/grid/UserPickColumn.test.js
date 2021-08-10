@@ -86,4 +86,114 @@ describe('UserPickColumn', () => {
 
         expect(cell.props.correct).toBe(false)
     })
+
+    describe('column grid row and column numbers', () => {
+        const games = [{name: "CHI@GB"}, {name: "DET@WAS"}];
+        const user = {name: "someone"};
+
+        const firstCellId = `${user.name}-${games[0].name}`;
+        const secondCellId = `${user.name}-${games[1].name}`;
+
+        it('first cell has column 0 when column prop is 0', () => {
+            const expectedColumn = 0;
+            let renderer = null;
+            act(() => {
+                renderer = create(<UserPickColumn
+                    games={games}
+                    pickSet={[]}
+                    user={user}
+                    column={expectedColumn}
+                />)
+            });
+
+            const cell = renderer.root.findByProps({id: firstCellId})
+
+            expect(cell.props.column).toBe(expectedColumn)
+        });
+
+        it('second cell has column 0 when column prop is 0', () => {
+            const expectedColumn = 0;
+            let renderer = null;
+            act(() => {
+                renderer = create(<UserPickColumn
+                    games={games}
+                    pickSet={[]}
+                    user={user}
+                    column={expectedColumn}
+                />)
+            });
+
+            const cell = renderer.root.findByProps({id: secondCellId})
+
+            expect(cell.props.column).toBe(expectedColumn)
+        });
+
+        it('first cell has column 1 when column prop is 1', () => {
+            const expectedColumn = 1;
+            let renderer = null;
+            act(() => {
+                renderer = create(<UserPickColumn
+                    games={games}
+                    pickSet={[]}
+                    user={user}
+                    column={expectedColumn}
+                />)
+            });
+
+            const cell = renderer.root.findByProps({id: firstCellId})
+
+            expect(cell.props.column).toBe(expectedColumn)
+        });
+
+        it('first cell has row 0 when row offset is 0', () => {
+            const expectedRow = 0;
+            let renderer = null;
+            act(() => {
+                renderer = create(<UserPickColumn
+                    games={games}
+                    pickSet={[]}
+                    user={user}
+                    rowOffset={expectedRow}
+                />)
+            });
+
+            const cell = renderer.root.findByProps({id: firstCellId})
+
+            expect(cell.props.row).toBe(expectedRow)
+        });
+
+        it('first cell has row 1 when row offset is 1', () => {
+            const expectedRow = 1;
+            let renderer = null;
+            act(() => {
+                renderer = create(<UserPickColumn
+                    games={games}
+                    pickSet={[]}
+                    user={user}
+                    rowOffset={expectedRow}
+                />)
+            });
+
+            const cell = renderer.root.findByProps({id: firstCellId})
+
+            expect(cell.props.row).toBe(expectedRow)
+        });
+        it('second cell has row 1 when row offset is 0', () => {
+            const rowOffset = 0;
+            const expectedRow = rowOffset+1;
+            let renderer = null;
+            act(() => {
+                renderer = create(<UserPickColumn
+                    games={games}
+                    pickSet={[]}
+                    user={user}
+                    rowOffset={rowOffset}
+                />)
+            });
+
+            const cell = renderer.root.findByProps({id: secondCellId})
+
+            expect(cell.props.row).toBe(expectedRow)
+        });
+    });
 })

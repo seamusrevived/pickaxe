@@ -96,17 +96,98 @@ describe('WeeklyGamesGrid', () => {
         })
     });
 
-    describe('rendered users cells', () => {
-
-        it('Renders three id cells when there are three users in data response', () => {
-            const nameCells = findByClassName(grid, 'name-linear-cell');
-
-            expect(nameCells.length).toBe(mockQueryData.users.length);
-            expect(nameCells.map(cell => cell.props.children))
-                .toEqual(mockQueryData.users.map(user => user.name))
+    describe('header cells', () => {
+        let nameCells = null;
+        beforeEach(() => {
+            nameCells = grid.findAll(el => el.props['data-testid']?.startsWith("name-row-"));
         });
 
-        it('Renders two id cells when there are two users in data response', () => {
+        it('Renders 3 name cells when three users', () => {
+            expect(nameCells.length).toBe(mockQueryData.users.length);
+        });
+
+        it('Renders first name cell with name of first user', () => {
+            expect(nameCells[0].props.children).toEqual(mockQueryData.users[0].name);
+        });
+
+        it('Renders second name cell with name of second user', () => {
+            expect(nameCells[1].props.children).toEqual(mockQueryData.users[1].name);
+        });
+
+        it('First user name has row 1', () => {
+            expect(nameCells[0].props.style.gridRow).toBe(1);
+        })
+
+        it('First user name has column 3', () => {
+            expect(nameCells[0].props.style.gridColumn).toBe(3);
+        })
+
+        it('Second user name has row 1', () => {
+            expect(nameCells[1].props.style.gridRow).toBe(1);
+        })
+
+        it('Second user name has column 4', () => {
+            expect(nameCells[1].props.style.gridColumn).toBe(4);
+        })
+
+        it('first user name has top border', () => {
+            const classes = nameCells[0].props.className.split(" ")
+            expect(classes.includes("grid__cell--top-border")).toBeTruthy()
+        });
+
+        it('first user name has left border', () => {
+            const classes = nameCells[0].props.className.split(" ")
+            expect(classes.includes("grid__cell--left-border")).toBeTruthy()
+        });
+
+        it('second user name has top border', () => {
+            const classes = nameCells[1].props.className.split(" ")
+            expect(classes.includes("grid__cell--top-border")).toBeTruthy()
+        });
+
+        it('second user name has no left border', () => {
+            const classes = nameCells[1].props.className.split(" ")
+            expect(classes.includes("grid__cell--left-border")).toBeFalsy()
+        });
+
+        describe('headers', () => {
+            let spreadHeader = null;
+            let resultHeader = null;
+            beforeEach(() => {
+                spreadHeader = grid.findByProps({"data-testid": "spread-header"})
+                resultHeader = grid.findByProps({"data-testid": "result-header"})
+            })
+
+            it('has spread header in row 1', () => {
+                expect(spreadHeader.props.style.gridRow).toEqual(1)
+            })
+
+            it('has spread header has no right border', () => {
+                const classes = spreadHeader.props.className.split(" ")
+                expect(classes.includes("grid__cell--no-right-border")).toBeTruthy()
+            })
+
+            it('has spread header in column 2', () => {
+                expect(spreadHeader.props.style.gridColumn).toEqual(2)
+            })
+
+            it('has result header in row 1', () => {
+                expect(resultHeader.props.style.gridRow).toEqual(1)
+            })
+
+            it('has result header in column 6 with three users', () => {
+                expect(resultHeader.props.style.gridColumn).toEqual(6)
+            })
+
+            it('has result header has no right border', () => {
+                const classes = resultHeader.props.className.split(" ")
+                expect(classes.includes("grid__cell--no-right-border")).toBeTruthy()
+            })
+
+        });
+
+
+        describe('two users', () => {
             const twoMockUserData = {
                 "users": [
                     {"name": "Someone"},
@@ -116,31 +197,84 @@ describe('WeeklyGamesGrid', () => {
                 "games": [],
                 "leaders": []
             };
+            let twoUserGrid = null;
+            let nameCells = null;
 
-            const grid = create(<WeeklyGamesGrid
-                currentWeek="0"
-                users={twoMockUserData.users}
-                games={twoMockUserData.games}
-                userPicks={twoMockUserData.userPicks}
-                totals={twoMockUserData.userTotals}/>).root;
-            const nameCells = findByClassName(grid, 'name-linear-cell');
+            beforeEach(() => {
+                twoUserGrid = create(<WeeklyGamesGrid
+                    currentWeek="0"
+                    users={twoMockUserData.users}
+                    games={twoMockUserData.games}
+                    userPicks={twoMockUserData.userPicks}
+                    totals={twoMockUserData.userTotals}/>).root;
 
-            expect(nameCells.length).toBe(twoMockUserData.users.length);
-            expect(nameCells.map(cell => cell.props.children))
-                .toEqual(twoMockUserData.users.map(user => user.name))
+                nameCells = twoUserGrid.findAll(el => el.props['data-testid']?.startsWith("name-row-"));
+            })
+
+            it('Renders two id cells when there are two users in data response', () => {
+                expect(nameCells.length).toBe(twoMockUserData.users.length);
+            });
+
+            it('renders first name cell with name of first user', () => {
+                expect(nameCells[0].props.children).toEqual(twoMockUserData.users[0].name);
+            });
+
+            it('renders second name cell with name of second user', () => {
+                expect(nameCells[1].props.children).toEqual(twoMockUserData.users[1].name);
+            });
+
+            it('has result header in column 5', () => {
+                const resultHeader = twoUserGrid.findByProps({"data-testid": "result-header"})
+                expect(resultHeader.props.style.gridColumn).toEqual(5)
+            })
         });
     });
 
     describe('rendered totals cells', () => {
-        it('Renders three total cells when there are three users in data response', () => {
-            const totalCells = findByClassName(grid, 'total-linear-cell');
-
-            expect(totalCells.length).toBe(mockQueryData.users.length);
-            expect(totalCells.map(cell => cell.props.children))
-                .toEqual(mockQueryData.userTotals.map(user => user.total))
+        let totalCells = null;
+        beforeEach(() => {
+            totalCells = grid.findAll(el => el.props['data-testid']?.startsWith("total-row-"));
         });
 
-        it('Renders two total cells when there are two users in data response', () => {
+        it('Renders three total cells when there are three users in data response', () => {
+            expect(totalCells.length).toBe(mockQueryData.users.length);
+        });
+
+        it('first total cell has first user total', () => {
+            expect(totalCells[0].props.children).toEqual(mockQueryData.userTotals[0].total);
+        });
+
+        it('second total cell has second user total', () => {
+            expect(totalCells[1].props.children).toEqual(mockQueryData.userTotals[1].total);
+        });
+
+        it('First user total has row 6 with 4 games', () => {
+            expect(totalCells[0].props.style.gridRow).toBe(6);
+        })
+
+        it('First user total has column 3', () => {
+            expect(totalCells[0].props.style.gridColumn).toBe(3);
+        })
+
+        it('Second user total has row 6 with 4 games', () => {
+            expect(totalCells[1].props.style.gridRow).toBe(6);
+        })
+
+        it('Second user total has column 4', () => {
+            expect(totalCells[1].props.style.gridColumn).toBe(4);
+        })
+
+        it('first user total has left border', () => {
+            const classes = totalCells[0].props.className.split(" ")
+            expect(classes.includes("grid__cell--left-border")).toBeTruthy()
+        });
+
+        it('second user total has no left border', () => {
+            const classes = totalCells[1].props.className.split(" ")
+            expect(classes.includes("grid__cell--left-border")).toBeFalsy()
+        });
+
+        describe('two users no games', () => {
             const twoMockUserData = {
                 "users": [
                     {"name": "Someone"},
@@ -154,30 +288,94 @@ describe('WeeklyGamesGrid', () => {
                 "leaders": []
             };
 
-            const grid = create(<WeeklyGamesGrid
-                currentWeek="0"
-                users={twoMockUserData.users}
-                games={twoMockUserData.games}
-                userPicks={twoMockUserData.userPicks}
-                totals={twoMockUserData.userTotals}/>).root;
-            const totalCells = findByClassName(grid, 'total-linear-cell');
+            let grid = null;
+            let twoUserTotalCells = null;
 
-            expect(totalCells.length).toBe(twoMockUserData.users.length);
-            expect(totalCells.map(cell => cell.props.children))
-                .toEqual(twoMockUserData.userTotals.map(user => user.total))
+            beforeEach(() => {
+                grid = create(<WeeklyGamesGrid
+                    currentWeek="0"
+                    users={twoMockUserData.users}
+                    games={twoMockUserData.games}
+                    userPicks={twoMockUserData.userPicks}
+                    totals={twoMockUserData.userTotals}/>).root;
+
+                twoUserTotalCells = grid.findAll(el => el.props['data-testid']?.startsWith("total-row-"));
+            });
+
+            it('Renders two total cells', () => {
+                expect(twoUserTotalCells.length).toBe(twoMockUserData.users.length);
+            });
+
+            it('Renders first user total', () => {
+                expect(twoUserTotalCells.length).toBe(twoMockUserData.users.length);
+                expect(twoUserTotalCells[0].props.children)
+                    .toEqual(twoMockUserData.userTotals[0].total)
+            });
+
+            it('First user total has row 2 with 0 games', () => {
+                expect(twoUserTotalCells[0].props.style.gridRow).toBe(2);
+            })
         });
     });
 
     describe('rendered games cells', () => {
-        it('Renders four game cells when there are four games in data response', () => {
-            const gameCells = findByClassName(grid, 'grid__cell--game');
+        let gameCells = null;
 
+        beforeEach(() => {
+            gameCells = grid.findAll(el => el.props['data-testid']?.startsWith("game-column-"));
+        })
+
+        it('Renders four game cells when there are four games in data response', () => {
             expect(gameCells.length).toBe(mockQueryData.games.length);
-            expect(gameCells.map(cell => cell.props.children))
-                .toEqual(mockQueryData.games.map(game => game.name))
         });
 
-        it('Renders one game cell when there is one game in data response', () => {
+        it('has first game cell name equal to game name', () => {
+            expect(gameCells[0].props.children).toEqual(mockQueryData.games[0].name);
+        });
+
+        it('has second game cell name equal to game name', () => {
+            expect(gameCells[1].props.children).toEqual(mockQueryData.games[1].name);
+        });
+
+        it('first game is in row 2', () => {
+            expect(gameCells[0].props.style.gridRow).toEqual(2);
+        });
+
+        it('second game is in row 3', () => {
+            expect(gameCells[1].props.style.gridRow).toEqual(3);
+        });
+
+        it('first game is in column 1', () => {
+            expect(gameCells[0].props.style.gridColumn).toEqual(1);
+        });
+
+        it('second game is in column 1', () => {
+            expect(gameCells[1].props.style.gridColumn).toEqual(1);
+        });
+
+
+        it('first game cell has left border', () => {
+            const classes = gameCells[0].props.className.split(" ")
+            expect(classes.includes("grid__cell--left-border")).toBeTruthy()
+        });
+
+        it('second game cell has left border', () => {
+            const classes = gameCells[1].props.className.split(" ")
+            expect(classes.includes("grid__cell--left-border")).toBeTruthy()
+        });
+
+
+        it('first game cell has top border', () => {
+            const classes = gameCells[0].props.className.split(" ")
+            expect(classes.includes("grid__cell--top-border")).toBeTruthy()
+        });
+
+        it('second game cell does not have top border', () => {
+            const classes = gameCells[1].props.className.split(" ")
+            expect(classes.includes("grid__cell--top-border")).toBeFalsy()
+        });
+
+        describe('one game', () => {
             const oneMockGameData = {
                 "users": [],
                 "games": [
@@ -187,86 +385,209 @@ describe('WeeklyGamesGrid', () => {
                 "leaders": []
             };
 
-            const grid = create(<WeeklyGamesGrid
-                currentWeek="0"
-                users={oneMockGameData.users}
-                games={oneMockGameData.games}
-                userPicks={oneMockGameData.userPicks}
-                totals={oneMockGameData.userTotals}/>).root;
+            let oneGameCells = null;
 
-            const gameCells = findByClassName(grid, 'grid__cell--game');
+            beforeEach(() => {
+                const grid = create(<WeeklyGamesGrid
+                    currentWeek="0"
+                    users={oneMockGameData.users}
+                    games={oneMockGameData.games}
+                    userPicks={oneMockGameData.userPicks}
+                    totals={oneMockGameData.userTotals}/>).root;
 
-            expect(gameCells.length).toBe(oneMockGameData.games.length);
-            expect(gameCells.map(cell => cell.props.children))
-                .toEqual(oneMockGameData.games.map(game => game.name))
+                oneGameCells = grid.findAll(el => el.props['data-testid']?.startsWith("game-column-"));
+            })
+
+            it('Renders one game cell when there is one game in data response', () => {
+                expect(oneGameCells.length).toBe(oneMockGameData.games.length);
+            });
+
+            it('renders game name', () => {
+                expect(oneGameCells[0].props.children).toEqual(oneMockGameData.games[0].name);
+            })
         });
-
     });
 
     describe('rendered spread cells', () => {
-        it('Renders four spread cells when there are four games in data response', () => {
-            const spreadCells = findByClassName(grid, 'grid__cell--spread');
+        let spreadCells = null;
 
+        beforeEach(() => {
+            spreadCells = grid.findAll(el => el.props['data-testid']?.startsWith("spread-column-"));
+        })
+
+        it('Renders four spread cells when there are four games in data response', () => {
             expect(spreadCells.length).toBe(mockQueryData.games.length);
-            expect(spreadCells.map(cell => cell.props.children))
-                .toEqual(mockQueryData.games.map(game => game.spread))
         });
 
-        it('Renders one spread cell when there is one game in data response', () => {
+        it('has first spread cell name equal to game name', () => {
+            expect(spreadCells[0].props.children).toEqual(mockQueryData.games[0].spread);
+        });
+
+        it('has second spread cell name equal to game name', () => {
+            expect(spreadCells[1].props.children).toEqual(mockQueryData.games[1].spread);
+        });
+
+        it('first spread is in row 2', () => {
+            expect(spreadCells[0].props.style.gridRow).toEqual(2);
+        });
+
+        it('second spread is in row 3', () => {
+            expect(spreadCells[1].props.style.gridRow).toEqual(3);
+        });
+
+        it('first spread is in column 2', () => {
+            expect(spreadCells[0].props.style.gridColumn).toEqual(2);
+        });
+
+        it('second spread is in column 2', () => {
+            expect(spreadCells[1].props.style.gridColumn).toEqual(2);
+        });
+
+        it('first spread cell has no left border', () => {
+            const classes = spreadCells[0].props.className.split(" ")
+            expect(classes.includes("grid__cell--left-border")).toBeFalsy()
+        });
+
+        it('second spread cell has no left border', () => {
+            const classes = spreadCells[1].props.className.split(" ")
+            expect(classes.includes("grid__cell--left-border")).toBeFalsy()
+        });
+
+
+        it('first spread cell has no top border', () => {
+            const classes = spreadCells[0].props.className.split(" ")
+            expect(classes.includes("grid__cell--top-border")).toBeFalsy()
+        });
+
+        it('second spread cell does not have top border', () => {
+            const classes = spreadCells[1].props.className.split(" ")
+            expect(classes.includes("grid__cell--top-border")).toBeFalsy()
+        });
+
+        describe('one game', () => {
             const oneMockGameData = {
                 "users": [],
                 "games": [
-                    {"name": "TLH@PCL", "spread": "-20"},
+                    {"name": "TLH@PCL", "spread": -20},
                 ],
                 "userTotals": [],
                 "leaders": []
             };
 
-            const grid = create(<WeeklyGamesGrid
-                currentWeek="0"
-                users={oneMockGameData.users}
-                games={oneMockGameData.games}
-                userPicks={oneMockGameData.userPicks}
-                totals={oneMockGameData.userTotals}/>).root;
+            let oneGameSpreadCells = null;
 
-            const spreadCells = findByClassName(grid, 'grid__cell--spread');
+            beforeEach(() => {
+                const grid = create(<WeeklyGamesGrid
+                    currentWeek="0"
+                    users={oneMockGameData.users}
+                    games={oneMockGameData.games}
+                    userPicks={oneMockGameData.userPicks}
+                    totals={oneMockGameData.userTotals}/>).root;
 
-            expect(spreadCells.length).toBe(oneMockGameData.games.length);
-            expect(spreadCells.map(cell => cell.props.children))
-                .toEqual(oneMockGameData.games.map(game => game.spread))
+                oneGameSpreadCells = grid.findAll(el => el.props['data-testid']?.startsWith("spread-column-"));
+            })
+
+            it('Renders one spread cell when there is one game in data response', () => {
+                expect(oneGameSpreadCells.length).toBe(oneMockGameData.games.length);
+            });
+
+            it('renders spread value', () => {
+                expect(oneGameSpreadCells[0].props.children).toEqual(oneMockGameData.games[0].spread);
+            })
         });
     });
 
     describe('rendered result cells', () => {
-        it('Renders four result cells when there are four games in data response', () => {
-            const resultCells = findByClassName(grid, 'grid__cell--result');
+        let resultCells = null;
 
+        beforeEach(() => {
+            resultCells = grid.findAll(el => el.props['data-testid']?.startsWith("result-column-"));
+        })
+
+        it('Renders four result cells when there are four games in data response', () => {
             expect(resultCells.length).toBe(mockQueryData.games.length);
-            expect(resultCells.map(cell => cell.props.children))
-                .toEqual(mockQueryData.games.map(game => game.result))
         });
 
-        it('Renders one result cell when there is one game in data response', () => {
+        it('has first result cell name equal to game name', () => {
+            expect(resultCells[0].props.children).toEqual(mockQueryData.games[0].result);
+        });
+
+        it('has second result cell name equal to game name', () => {
+            expect(resultCells[1].props.children).toEqual(mockQueryData.games[1].result);
+        });
+
+        it('first result is in row 2', () => {
+            expect(resultCells[0].props.style.gridRow).toEqual(2);
+        });
+
+        it('second result is in row 3', () => {
+            expect(resultCells[1].props.style.gridRow).toEqual(3);
+        });
+
+        it('first result is in column 6 with three users', () => {
+            expect(resultCells[0].props.style.gridColumn).toEqual(6);
+        });
+
+        it('second result is in column 6 with three users', () => {
+            expect(resultCells[1].props.style.gridColumn).toEqual(6);
+        });
+
+
+        it('first result cell has no left border', () => {
+            const classes = resultCells[0].props.className.split(" ")
+            expect(classes.includes("grid__cell--left-border")).toBeFalsy()
+        });
+
+        it('second result cell has no left border', () => {
+            const classes = resultCells[1].props.className.split(" ")
+            expect(classes.includes("grid__cell--left-border")).toBeFalsy()
+        });
+
+
+        it('first result cell has no top border', () => {
+            const classes = resultCells[0].props.className.split(" ")
+            expect(classes.includes("grid__cell--top-border")).toBeFalsy()
+        });
+
+        it('second v cell does not have top border', () => {
+            const classes = resultCells[1].props.className.split(" ")
+            expect(classes.includes("grid__cell--top-border")).toBeFalsy()
+        });
+
+        describe('one game zero users', () => {
             const oneMockGameData = {
                 "users": [],
                 "games": [
-                    {"name": "TLH@PCL", "spread": "-20", "result": "PCL"},
+                    {"name": "TLH@PCL", "spread": -20, "result": "PCL"},
                 ],
                 "userTotals": [],
                 "leaders": []
             };
 
-            const grid = create(<WeeklyGamesGrid
-                currentWeek="0"
-                users={oneMockGameData.users}
-                games={oneMockGameData.games}
-                userPicks={oneMockGameData.userPicks}
-                totals={oneMockGameData.userTotals}/>).root;
-            const resultCells = findByClassName(grid, 'grid__cell--result');
+            let oneGameResultCells = null;
 
-            expect(resultCells.length).toBe(oneMockGameData.games.length);
-            expect(resultCells.map(cell => cell.props.children))
-                .toEqual(oneMockGameData.games.map(game => game.result))
+            beforeEach(() => {
+                const grid = create(<WeeklyGamesGrid
+                    currentWeek="0"
+                    users={oneMockGameData.users}
+                    games={oneMockGameData.games}
+                    userPicks={oneMockGameData.userPicks}
+                    totals={oneMockGameData.userTotals}/>).root;
+
+                oneGameResultCells = grid.findAll(el => el.props['data-testid']?.startsWith("result-column-"));
+            })
+
+            it('Renders one result cell when there is one game in data response', () => {
+                expect(oneGameResultCells.length).toBe(oneMockGameData.games.length);
+            });
+
+            it('renders result value', () => {
+                expect(oneGameResultCells[0].props.children).toEqual(oneMockGameData.games[0].result);
+            })
+
+            it('first result is in column 3', () => {
+                expect(oneGameResultCells[0].props.style.gridColumn).toEqual(3);
+            });
         });
 
     });

@@ -1,17 +1,38 @@
-.grid__cell--name, .grid__cell--total {
-    display: inline-block;
-    vertical-align: top;
+.grid {
+    display: grid;
+    margin-top: 16px;
 }
 
-.grid__cell--game {
+.grid__cell {
+    height: 20px;
+    border-right: black 1px solid;
+    border-bottom: black 1px solid;
+    padding-top: 4px;
+    padding-left: 6px;
+    padding-right: 6px;
+    text-align: right;
+    line-height: 17px;
+}
+
+.grid__cell--left-border {
+    border-left: black 1px solid;
+    margin-left: -1px;
+}
+
+.grid__cell--top-border {
+    border-top: black 1px solid;
+    margin-top: -1px;
+}
+
+.grid__cell--no-right-border {
+    border-right: none;
+    margin-left: -1px;
+}
+
+.grid__cell--align-left {
     text-align: left;
 }
 
-.grid__cell--correct {
+.grid__cell--correct-pick {
     background-color: #4adb2a;
-    border-top: solid 1px;
-    border-right: solid 1px;
-    height: 19px;
-    width: 95px;
-    line-height: 14px;
 }
