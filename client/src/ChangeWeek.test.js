@@ -16,13 +16,13 @@ describe('ChangeWeek Widget', () => {
     });
 
     it('has a forward button', () => {
-        const forwardButton = changeWeek.root.findAllByProps({id: "change-week--forward"})
-        expect(forwardButton.length).toEqual(1)
+        const forwardButton = changeWeek.root.findByProps({id: "change-week--forward"})
+        expect(forwardButton).toBeTruthy()
     })
 
     it('has a backwards button', () => {
-        const backButton = changeWeek.root.findAllByProps({id: "change-week--back"})
-        expect(backButton.length).toEqual(1)
+        const backButton = changeWeek.root.findByProps({id: "change-week--back"})
+        expect(backButton).toBeTruthy()
     })
 
     it('displays the week 0 from props with week 0', () => {
