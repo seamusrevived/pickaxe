@@ -18,7 +18,7 @@ describe('leaderboard', () => {
             .type('go')
             .invoke('blur')
 
-            .get(".leader-element-name", {timeout: 20000}).first().should('contain', 'Sereres')
+            .get(".leaderboard__cell--name", {timeout: 20000}).first().should('contain', 'Sereres')
 
             .get(":nth-child(7) > .leaderboard__cell--name").should('contain', 'Seamus')
             .get(":nth-child(7) > .leaderboard__cell--weeks").should('contain', '0')

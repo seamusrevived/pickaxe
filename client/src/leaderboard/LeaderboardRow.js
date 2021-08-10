@@ -5,7 +5,7 @@ export function LeaderboardRow(props) {
     let firstCellClass = "leaderboard__cell--left-border";
 
     return [
-        <div className={`${baseCssClasses} ${firstCellClass} leaderboard__cell--name`}
+        <div className={`${baseCssClasses} ${firstCellClass} leaderboard__cell--name leaderboard__cell--text`}
              data-testid={`leaderboard-row-name-${props.name}`}
              key={`leaderboard-row-name-${props.name}`}>
             {props.name}

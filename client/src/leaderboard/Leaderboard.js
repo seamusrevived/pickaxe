@@ -16,7 +16,7 @@ export function Leaderboard({data}) {
     const cellHeaderBaseClasses = "leaderboard__cell leaderboard__cell--no-right-border ";
 
     return <div key="grid-leaders" className="leaderboard__container">
-        <div className={`${cellHeaderBaseClasses} leaderboard__cell--name`}
+        <div className={`${cellHeaderBaseClasses} leaderboard__cell--text`}
             data-testid="leaderboard-names-header">
             Leaders
         </div>
