@@ -62,7 +62,10 @@ describe('UserPicksGrid', () => {
                 users={mockQueryData.users}
                 games={mockQueryData.games}
                 userPicks={mockQueryData.userPicks}
-                sendData={sendDataSpy}/>);
+                sendData={sendDataSpy}
+                rowOffset={0}
+                columnOffset={0}
+            />);
             container = renderResult.container;
         })
 
@@ -83,7 +86,10 @@ describe('UserPicksGrid', () => {
                 users={mockQueryData.users}
                 games={mockQueryData.games}
                 userPicks={mockQueryData.userPicks}
-                sendData={sendDataSpy}/>);
+                sendData={sendDataSpy}
+                rowOffset={0}
+                columnOffset={0}
+            />);
             let cell = container.querySelector('#Vegas-CHI\\@GB');
 
             testingLibraryAct(() => {
@@ -112,6 +118,128 @@ describe('UserPicksGrid', () => {
 
             cell = container.querySelector('#Vegas-CHI\\@GB');
             expect(cell.textContent).toBe("CHI")
+        });
+    });
+
+    describe("row and column offsets", () => {
+        const firstCellId = `${mockQueryData.users[0].name}-${mockQueryData.games[0].name}`;
+        const firstRowSecondColumnCellId = `${mockQueryData.users[1].name}-${mockQueryData.games[0].name}`;
+        const secondRowSecondColumnCellId = `${mockQueryData.users[1].name}-${mockQueryData.games[1].name}`;
+
+        it('first PickCell has column equal to column offset when offset 0', () => {
+            let grid = null;
+
+            const expectedColumn = 0;
+
+            act(() => {
+                grid = create(<UserPicksGrid
+                    users={mockQueryData.users}
+                    games={mockQueryData.games}
+                    userPicks={mockQueryData.userPicks}
+                    sendData={sendDataSpy}
+                    columnOffset={expectedColumn}
+                />)
+            });
+            let cell = grid.root.find(el => el.props.id === firstCellId);
+
+            expect(cell.props.column).toEqual(expectedColumn);
+        });
+
+        it('first PickCell has column equal to column offset when offset 1', () => {
+            let grid = null;
+
+            const expectedColumn = 1;
+
+            act(() => {
+                grid = create(<UserPicksGrid
+                    users={mockQueryData.users}
+                    games={mockQueryData.games}
+                    userPicks={mockQueryData.userPicks}
+                    sendData={sendDataSpy}
+                    columnOffset={expectedColumn}
+                />)
+            });
+            let cell = grid.root.find(el => el.props.id === firstCellId);
+
+            expect(cell.props.column).toEqual(expectedColumn);
+        });
+
+        it('first row second column PickCell has column equal to column offset 1 when offset 0', () => {
+            let grid = null;
+
+            const columnOffset = 0;
+            const expectedColumn = columnOffset + 1;
+
+            act(() => {
+                grid = create(<UserPicksGrid
+                    users={mockQueryData.users}
+                    games={mockQueryData.games}
+                    userPicks={mockQueryData.userPicks}
+                    sendData={sendDataSpy}
+                    columnOffset={columnOffset}
+                />)
+            });
+            let cell = grid.root.find(el => el.props.id === firstRowSecondColumnCellId);
+
+            expect(cell.props.column).toEqual(expectedColumn);
+        });
+
+        it('first PickCell has row equal to row offset when offset 0', () => {
+            let grid = null;
+
+            const expectedRow = 0;
+
+            act(() => {
+                grid = create(<UserPicksGrid
+                    users={mockQueryData.users}
+                    games={mockQueryData.games}
+                    userPicks={mockQueryData.userPicks}
+                    sendData={sendDataSpy}
+                    rowOffset={expectedRow}
+                />)
+            });
+            let cell = grid.root.find(el => el.props.id === firstCellId);
+
+            expect(cell.props.row).toEqual(expectedRow);
+        });
+
+        it('first PickCell has row equal to row offset when offset 1', () => {
+            let grid = null;
+
+            const expectedRow = 1;
+
+            act(() => {
+                grid = create(<UserPicksGrid
+                    users={mockQueryData.users}
+                    games={mockQueryData.games}
+                    userPicks={mockQueryData.userPicks}
+                    sendData={sendDataSpy}
+                    rowOffset={expectedRow}
+                />)
+            });
+            let cell = grid.root.find(el => el.props.id === firstCellId);
+
+            expect(cell.props.row).toEqual(expectedRow);
+        });
+
+        it('second row second column PickCell has row equal to 2 when offset 1', () => {
+            let grid = null;
+
+            const rowOffset = 1;
+            const expectedRow = rowOffset + 1;
+
+            act(() => {
+                grid = create(<UserPicksGrid
+                    users={mockQueryData.users}
+                    games={mockQueryData.games}
+                    userPicks={mockQueryData.userPicks}
+                    sendData={sendDataSpy}
+                    rowOffset={rowOffset}
+                />)
+            });
+            let cell = grid.root.find(el => el.props.id === secondRowSecondColumnCellId);
+
+            expect(cell.props.row).toEqual(expectedRow);
         });
     });
 });
