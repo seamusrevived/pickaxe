@@ -86,4 +86,48 @@ describe('PickCell', () => {
         expect(div.props.className).not.toContain("grid__cell--correct")
     });
 
+    it('has grid row 0 when row prop 0', () => {
+        let cellRenderer = null;
+        act(() => {
+            cellRenderer = create(<PickCell user="Some user" game="GB@CHI" pick="CHI" correct={false} row={0}/>)
+        });
+
+        const cell = cellRenderer.root;
+        const div = cell.children[0];
+        expect(div.props.style.gridRow).toEqual(0)
+    });
+
+    it('has grid row 1 when row prop 1', () => {
+        let cellRenderer = null;
+        act(() => {
+            cellRenderer = create(<PickCell user="Some user" game="GB@CHI" pick="CHI" correct={false} row={1}/>)
+        });
+
+        const cell = cellRenderer.root;
+        const div = cell.children[0];
+        expect(div.props.style.gridRow).toEqual(1)
+    });
+
+    it('has grid column 0 when column prop 0', () => {
+        let cellRenderer = null;
+        act(() => {
+            cellRenderer = create(<PickCell user="Some user" game="GB@CHI" pick="CHI" correct={false} column={0}/>)
+        });
+
+        const cell = cellRenderer.root;
+        const div = cell.children[0];
+        expect(div.props.style.gridColumn).toEqual(0)
+    });
+
+    it('has grid column 1 when column prop 1', () => {
+        let cellRenderer = null;
+        act(() => {
+            cellRenderer = create(<PickCell user="Some user" game="GB@CHI" pick="CHI" correct={false} column={1}/>)
+        });
+
+        const cell = cellRenderer.root;
+        const div = cell.children[0];
+        expect(div.props.style.gridColumn).toEqual(1)
+    });
+
 });
