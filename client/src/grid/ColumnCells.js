@@ -4,6 +4,7 @@ const ColumnCells = props => {
     const {items, name, column, rowOffset, leftBorder, topBorder, alignLeft} = props;
     let cells = items.map((item, index) => {
         let cssClass = `grid__cell `;
+
         if(leftBorder) {
             cssClass += "grid__cell--left-border "
         }
