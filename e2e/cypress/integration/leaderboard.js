@@ -17,12 +17,13 @@ describe('leaderboard', () => {
             .click()
             .type('go')
             .invoke('blur')
+            .wait(50)
 
             .get(".leaderboard__cell--name", {timeout: 20000}).first().should('contain', 'Sereres')
 
-            .get(".leaderboard__cell--name").eq(2).should('contain', 'Seamus')
-            .get(".leaderboard__cell--weeks").eq(2).should('contain', '0')
-            .get(".leaderboard__cell--picks").eq(2).should('contain', '1')
+            .get(".leaderboard__cell--name").eq(3).should('contain', 'Seamus')
+            .get(".leaderboard__cell--weeks").eq(3).should('contain', '0')
+            .get(".leaderboard__cell--picks").eq(3).should('contain', '1')
 
             .get("#Seamus-GB\\@CHI")
             .click()
