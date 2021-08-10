@@ -3,7 +3,7 @@ import React from "react";
 const ColumnCells = props => {
     const {items, name, column, rowOffset, leftBorder, topBorder, alignLeft} = props;
     let cells = items.map((item, index) => {
-        let cssClass = `grid__cell `;
+        let cssClass = `grid__cell grid__cell--${name}`;
 
         if(leftBorder) {
             cssClass += "grid__cell--left-border "

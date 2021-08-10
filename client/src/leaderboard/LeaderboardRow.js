@@ -5,17 +5,17 @@ export function LeaderboardRow(props) {
     let firstCellClass = "leaderboard__cell--left-border";
 
     return [
-        <div className={`${baseCssClasses} ${firstCellClass} leaderboard__cell--name`}
+        <div className={`${baseCssClasses} ${firstCellClass} leaderboard__name-cell leaderboard__cell--name`}
              data-testid={`leaderboard-row-name-${props.name}`}
              key={`leaderboard-row-name-${props.name}`}>
             {props.name}
         </div>,
-        <div className={`${baseCssClasses} leaderboard__cell--numerical`}
+        <div className={`${baseCssClasses} leaderboard__weeksname-cell leaderboard__cell--numerical`}
              data-testid={`leaderboard-row-weeks-${props.name}`}
              key={`leaderboard-row-weeks-${props.name}`}>
             {props.weeks}
         </div>,
-        <div className={`${baseCssClasses} leaderboard__cell--numerical`}
+        <div className={`${baseCssClasses} leaderboard__picks-cell leaderboard__cell--numerical`}
              data-testid={`leaderboard-row-picks-${props.name}`}
              key={`leaderboard-row-picks-${props.name}`}>
             {props.picks}
