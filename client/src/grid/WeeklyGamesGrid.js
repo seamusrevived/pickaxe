@@ -3,6 +3,7 @@ import {useMutation} from "@apollo/react-hooks";
 import {UPDATE_PICKS_MUTATION} from "../graphqlQueries";
 import ColumnCells from "./ColumnCells";
 import RowCells from "./RowCells";
+import HeaderRow from "./HeaderRow";
 import UserPicksGrid from "./UserPicksGrid";
 import "./WeeklyGamesGrid.css"
 
@@ -34,28 +35,8 @@ const WeeklyGamesGrid = props => {
     const nTrailingColumns = 1;
     const nTotalColumns = nLeadingColumns + nTrailingColumns + userNames.length;
 
-    const headerRow = [
-        <div className='grid__cell grid__cell--name grid__cell--no-right-border'
-             style={{gridRow: 1, gridColumn: 2}}
-             key="spread-header"
-             data-testid="spread-header">
-            Spread
-        </div>,
-        <RowCells key="grid__cell--names"
-                  items={userNames}
-                  name="name"
-                  row={1}
-                  columnOffset={nLeadingColumns + 1}
-                  topBorder
-                  leftBorder
-        />,
-        <div className='grid__cell grid__cell--name grid__cell--no-right-border'
-             style={{gridRow: 1, gridColumn: nLeadingColumns + userNames.length + 1}}
-             key="result-header"
-             data-testid="result-header">
-            Result
-        </div>
-    ];
+    const headerRow = <HeaderRow key="header-row"
+                                 userNames={userNames}/>;
 
     const gamesColumn = <ColumnCells key="game-cells"
                                      id="game-cells"
@@ -98,7 +79,7 @@ const WeeklyGamesGrid = props => {
                                 leftBorder/>;
 
     const grid = [
-        ...headerRow,
+        headerRow,
         gamesColumn,
         spreadsColumn,
         userPicksGrid,
