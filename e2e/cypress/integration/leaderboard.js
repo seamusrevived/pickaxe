@@ -17,7 +17,7 @@ describe('leaderboard', () => {
             .click()
             .type('go')
             .invoke('blur')
-            .wait(50)
+            .wait(200)
 
             .get(".leaderboard__cell--name", {timeout: 20000}).first().should('contain', 'Sereres')
 

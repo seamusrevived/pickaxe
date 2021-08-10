@@ -604,12 +604,12 @@ describe('WeeklyGamesGrid', () => {
             />).root;
 
 
-            const spinners = grid.findAllByProps({"data-testid": "loading-spinner"})
+            const spinner = grid.findAllByProps({"data-testid": "loading-spinner"})
 
-            expect(spinners.length).toEqual(0)
+            expect(spinner.length).toEqual(0)
         });
 
-        it('does not show spinner when not loading', () => {
+        it('shows spinner when loading', () => {
             const grid = create(<WeeklyGamesGrid
                 currentWeek="0"
                 users={mockQueryData.users}
@@ -620,9 +620,9 @@ describe('WeeklyGamesGrid', () => {
             />).root;
 
 
-            const spinners = grid.findAllByProps({"data-testid": "loading-spinner"})
+            const spinner = grid.findByProps({"data-testid": "loading-spinner"})
 
-            expect(spinners.length).toEqual(1)
+            expect(spinner).toBeTruthy()
         });
     })
 });
