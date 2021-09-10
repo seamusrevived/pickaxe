@@ -72,11 +72,14 @@ class NflApi(private val tokenURL: URL, private val apiURL: URL) {
         val stream = createWeekQueryConnection(week).inputStream
         val response = ObjectMapper().readValue(InputStreamReader(stream).readText(), HashMap::class.java)
 
-        val games = response["games"] as List<HashMap<String, Any>>
+        val games = response["games"] as? List<*>
 
-        for (game in games) {
-            val gameDTO = buildGameInWeek(game, week)
-            result.add(gameDTO)
+        for (game in games!!) {
+            if(game is HashMap<*, *>) {
+                val gameDTO = buildGameInWeek(game, week)
+                result.add(gameDTO)
+            }
+
         }
 
         return result
@@ -95,18 +98,22 @@ class NflApi(private val tokenURL: URL, private val apiURL: URL) {
         return buildGameResponse(game, details)
     }
 
-    private fun buildGameInWeek(game: HashMap<String, Any>, week: WeekDTO): GameDTO {
-        val detail = game["detail"] as HashMap<String, String>?
-        val parsedId = if(detail == null) {
-            null
-        } else {
-            UUID.fromString(detail["id"])
-        }
+    private fun buildGameInWeek(game: HashMap<*, *>, week: WeekDTO): GameDTO {
 
         return GameDTO(formatGameName(game), week.name).apply {
-            id = parsedId
+            id = extractGameId(game)
             gameTime = OffsetDateTime.parse(game["time"] as String)
         }
+    }
+
+    private fun extractGameId(game: HashMap<*, *>): UUID? {
+        val detail = game["detail"] as HashMap<*, *>?
+        val parsedId = if (detail == null || detail["id"] !is String) {
+            null
+        } else {
+            UUID.fromString(detail["id"] as String)
+        }
+        return parsedId
     }
 
     private fun buildGameResponse(game: GameDTO, details: Details): GameDTO {
@@ -152,9 +159,11 @@ class NflApi(private val tokenURL: URL, private val apiURL: URL) {
 
     }
 
-    private fun formatGameName(game: HashMap<String, Any>) =
-        (game["awayTeam"] as HashMap<String, String>)["abbreviation"] +
-                "@" + (game["homeTeam"] as HashMap<String, String>)["abbreviation"]
+    private fun formatGameName(game: HashMap<*, *>): String {
+        val awayAbbreviation = (game["awayTeam"] as HashMap<*, *>)["abbreviation"]
+        val homeAbbreviation = (game["homeTeam"] as HashMap<*, *>)["abbreviation"]
+        return "$awayAbbreviation@$homeAbbreviation"
+    }
 
     private fun setCommonHeaders(connection: HttpURLConnection) {
         connection.setRequestProperty("authority", "api.nfl.com")

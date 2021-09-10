@@ -10,10 +10,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import dto.GameDTO
 import dto.WeekDTO
 import dto.nfl.api.game.*
-import dto.nfl.api.week.*
 import io.mockk.*
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.assertThrows
 import java.io.*
 import java.text.SimpleDateFormat
 import java.time.*
@@ -212,7 +210,7 @@ class NflApiTest {
     }
 
     @Test
-    fun `games without detail does not have id`() {
+    fun `games without detail do not have id`() {
         val weekTypeQuery = "REG"
         val weekQuery = 5
         val weekName = "Week 5"
@@ -224,6 +222,28 @@ class NflApiTest {
         handler.setConnection(URL(baseApiUrl, uri), mockApiConnection)
         val expectedGames = object {
             val games = listOf(buildGameWithoutDetail("GB", "CHI", defaultGameStart))
+        }
+        every { mockApiConnection.inputStream } returns ObjectMapper().writeValueAsString(expectedGames)
+            .byteInputStream()
+
+        val result = NflApi(tokenURL, baseApiUrl).getWeek(week)
+
+        assertNull(result.first().id)
+    }
+
+    @Test
+    fun `games without id but with detail do not have id`() {
+        val weekTypeQuery = "REG"
+        val weekQuery = 5
+        val weekName = "Week 5"
+        val week = WeekDTO(weekName).apply {
+            weekType = weekTypeQuery
+            week = weekQuery
+        }
+        val uri = buildRelativeApiWeekQueryUrl(season, weekTypeQuery, weekQuery)
+        handler.setConnection(URL(baseApiUrl, uri), mockApiConnection)
+        val expectedGames = object {
+            val games = listOf(buildGame("GB", "CHI", defaultGameStart, null))
         }
         every { mockApiConnection.inputStream } returns ObjectMapper().writeValueAsString(expectedGames)
             .byteInputStream()
@@ -671,7 +691,7 @@ class NflApiTest {
             }
         }
 
-    private fun buildGame(away: String, home: String, time: OffsetDateTime, id: UUID): Any {
+    private fun buildGame(away: String, home: String, time: OffsetDateTime, id: UUID?): Any {
         return object {
             var time = time.toString()
             var awayTeam = object {
