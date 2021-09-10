@@ -10,10 +10,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import dto.GameDTO
 import dto.WeekDTO
 import dto.nfl.api.game.*
-import dto.nfl.api.week.*
 import io.mockk.*
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.assertThrows
 import java.io.*
 import java.text.SimpleDateFormat
 import java.time.*
@@ -36,6 +34,17 @@ class NflApiTest {
 
     private val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.000'Z'")
 
+    private val defaultId = UUID.fromString("10012016-1006-0091-2590-6d5ccb310545")
+
+    private val defaultGameStart = OffsetDateTime.of(
+        2020, 4, 25,
+        12, 20, 55, 0,
+        ZoneOffset.of("-0500")
+    )
+
+    private val defaultGames = object {
+        var games: List<Any> = listOf(buildGame("ARI", "SF", defaultGameStart, defaultId))
+    }
 
     @BeforeEach
     fun beforeEach() {
@@ -185,11 +194,8 @@ class NflApiTest {
         }
         val uri = buildRelativeApiWeekQueryUrl(season, weekTypeQuery, weekQuery)
         handler.setConnection(URL(baseApiUrl, uri), mockApiConnection)
-        val expectedGames = baseWeekQueryDTO.apply {
-            data.viewer.league.games.edges = listOf(
-                buildGame("ARI", "SF", defaultGameStart)
-            )
-        }
+        val expectedGames = defaultGames
+
         every { mockApiConnection.inputStream } returns ObjectMapper().writeValueAsString(expectedGames)
             .byteInputStream()
 
@@ -199,8 +205,52 @@ class NflApiTest {
         assertEquals(1, result.size)
         assertEquals("ARI@SF", result.first().name)
         assertEquals(weekName, result.first().week)
-        assertEquals(expectedGames.data.viewer.league.games.edges.first().node.gameDetailId, result.first().id)
+        assertEquals(defaultId, result.first().id)
         assertEquals(defaultGameStart, result.first().gameTime)
+    }
+
+    @Test
+    fun `games without detail do not have id`() {
+        val weekTypeQuery = "REG"
+        val weekQuery = 5
+        val weekName = "Week 5"
+        val week = WeekDTO(weekName).apply {
+            weekType = weekTypeQuery
+            week = weekQuery
+        }
+        val uri = buildRelativeApiWeekQueryUrl(season, weekTypeQuery, weekQuery)
+        handler.setConnection(URL(baseApiUrl, uri), mockApiConnection)
+        val expectedGames = object {
+            val games = listOf(buildGameWithoutDetail("GB", "CHI", defaultGameStart))
+        }
+        every { mockApiConnection.inputStream } returns ObjectMapper().writeValueAsString(expectedGames)
+            .byteInputStream()
+
+        val result = NflApi(tokenURL, baseApiUrl).getWeek(week)
+
+        assertNull(result.first().id)
+    }
+
+    @Test
+    fun `games without id but with detail do not have id`() {
+        val weekTypeQuery = "REG"
+        val weekQuery = 5
+        val weekName = "Week 5"
+        val week = WeekDTO(weekName).apply {
+            weekType = weekTypeQuery
+            week = weekQuery
+        }
+        val uri = buildRelativeApiWeekQueryUrl(season, weekTypeQuery, weekQuery)
+        handler.setConnection(URL(baseApiUrl, uri), mockApiConnection)
+        val expectedGames = object {
+            val games = listOf(buildGame("GB", "CHI", defaultGameStart, null))
+        }
+        every { mockApiConnection.inputStream } returns ObjectMapper().writeValueAsString(expectedGames)
+            .byteInputStream()
+
+        val result = NflApi(tokenURL, baseApiUrl).getWeek(week)
+
+        assertNull(result.first().id)
     }
 
     @Test
@@ -215,11 +265,7 @@ class NflApiTest {
         val uri = buildRelativeApiWeekQueryUrl(season, weekTypeQuery, weekQuery)
         handler.setConnection(URL(baseApiUrl, uri), mockApiConnection)
         every { mockApiConnection.setRequestProperty(any(), any()) } returns Unit
-        val expectedGames = baseWeekQueryDTO.apply {
-            data.viewer.league.games.edges = listOf(
-                buildGame("ARI", "SF", defaultGameStart)
-            )
-        }
+        val expectedGames = defaultGames
         every { mockApiConnection.inputStream } returns ObjectMapper().writeValueAsString(expectedGames)
             .byteInputStream()
 
@@ -244,11 +290,7 @@ class NflApiTest {
         val mockConnection = mockkClass(HttpURLConnection::class)
         handler.setConnection(URL(differentBaseUrl, uri), mockConnection)
         every { mockConnection.setRequestProperty(any(), any()) } returns Unit
-        val expectedGames = baseWeekQueryDTO.apply {
-            data.viewer.league.games.edges = listOf(
-                buildGame("ARI", "SF", defaultGameStart)
-            )
-        }
+        val expectedGames = defaultGames
         every { mockConnection.inputStream } returns ObjectMapper().writeValueAsString(expectedGames).byteInputStream()
 
         val result = NflApi(tokenURL, differentBaseUrl).getWeek(week)
@@ -258,6 +300,7 @@ class NflApiTest {
         assertEquals("ARI@SF", result.first().name)
         assertEquals(weekName, result.first().week)
     }
+
 
     @Test
     fun getWeekGetsGamesFromNFLWithTwoGamesRegularWeek8() {
@@ -270,10 +313,11 @@ class NflApiTest {
             week = weekQuery
         }
         handler.setConnection(URL(baseApiUrl, uri), mockApiConnection)
-        val expectedGames = baseWeekQueryDTO.apply {
-            data.viewer.league.games.edges = listOf(
-                buildGame("CHI", "IND", defaultGameStart),
-                buildGame("TEN", "MIA", defaultGameStart.plusHours(3))
+        val expectedGames = object {
+            var games: List<Any> = listOf(
+                buildGame("CHI", "IND", defaultGameStart, defaultId),
+                buildGame("TEN", "MIA", defaultGameStart.plusHours(3), defaultId)
+
             )
         }
         every { mockApiConnection.inputStream } returns ObjectMapper().writeValueAsString(expectedGames)
@@ -298,8 +342,10 @@ class NflApiTest {
             week = 3
         }
         handler.setConnection(URL(baseApiUrl, uri), mockApiConnection)
+
+
         every { mockApiConnection.inputStream } returns
-                ObjectMapper().writeValueAsString(baseWeekQueryDTO).byteInputStream()
+                ObjectMapper().writeValueAsString(defaultGames).byteInputStream()
 
         NflApi(tokenURL, baseApiUrl).getWeek(week)
 
@@ -322,7 +368,7 @@ class NflApiTest {
         handler.setConnection(URL(baseApiUrl, uri), mockApiConnection)
         val token = generateExpiringToken(1)
         every { mockTokenConnection.inputStream } returns buildByteStreamResponse(token)
-        every { mockApiConnection.inputStream } returns ObjectMapper().writeValueAsString(baseWeekQueryDTO)
+        every { mockApiConnection.inputStream } returns ObjectMapper().writeValueAsString(defaultGames)
             .byteInputStream()
         val week = WeekDTO("Week 3").apply {
             weekType = "REG"
@@ -579,11 +625,6 @@ class NflApiTest {
         }
     }
 
-    private val defaultGameStart = OffsetDateTime.of(
-        2020, 4, 25,
-        12, 20, 55, 0,
-        ZoneOffset.of("-0500")
-    )
 
     private fun defaultGame(): GameQueryDTO {
         return baseGameQueryDTO.apply {
@@ -607,7 +648,7 @@ class NflApiTest {
         weekTypeQuery: String,
         weekQuery: Int
     ): String {
-        return "/v3/shield/?query=query%7Bviewer%7Bleague%7Bgames(first%3A100%2Cweek_seasonValue%3A${season}%2Cweek_seasonType%3A${weekTypeQuery}%2Cweek_weekValue%3A${weekQuery}%2C)%7Bedges%7Bnode%7BgameDetailId%20gameTime%20awayTeam%7BnickName%20abbreviation%20%7DhomeTeam%7BnickName%20abbreviation%20%7D%7D%7D%7D%7D%7D%7D&variables=null"
+        return "/experience/v1/games?season=${season}&seasonType=${weekTypeQuery}&week=${weekQuery}"
     }
 
     private fun nflServiceWithFixedTime(url: URL, token: String? = null): NflApi {
@@ -650,35 +691,33 @@ class NflApiTest {
             }
         }
 
-    private val baseWeekQueryDTO: WeekQueryDTO
-        get() {
-            return WeekQueryDTO().apply {
-                data = WeekData().apply {
-                    viewer = WeekViewer().apply {
-                        league = League().apply {
-                            games = Games().apply {
-                                edges = ArrayList(0)
-                            }
-                        }
-                    }
-                }
+    private fun buildGame(away: String, home: String, time: OffsetDateTime, id: UUID?): Any {
+        return object {
+            var time = time.toString()
+            var awayTeam = object {
+                var nickName = "Cardinals"
+                var abbreviation = away
+            }
+            var homeTeam = object {
+                var nickName = "49ers"
+                var abbreviation = home
+            }
+            var detail = object {
+                var id = id
             }
         }
+    }
 
-    private fun buildGame(away: String, home: String, time: OffsetDateTime): Edge {
-        return Edge().apply {
-            node = Node().apply {
-                gameDetailId = UUID.fromString("10012016-1006-0091-2590-6d5ccb310545")
-                gameTime = time.toString()
-                awayTeam = Team().apply {
-                    nickName = "Cardinals"
-                    abbreviation = away
-                }
-                homeTeam = Team().apply {
-                    nickName = "49ers"
-                    gameDetailId = UUID.fromString("10044500-2016-98ea-5998-12e71471f00f")
-                    abbreviation = home
-                }
+    private fun buildGameWithoutDetail(away: String, home: String, time: OffsetDateTime): Any {
+        return object {
+            var time = time.toString()
+            var awayTeam = object {
+                var nickName = "Cardinals"
+                var abbreviation = away
+            }
+            var homeTeam = object {
+                var nickName = "49ers"
+                var abbreviation = home
             }
         }
     }
