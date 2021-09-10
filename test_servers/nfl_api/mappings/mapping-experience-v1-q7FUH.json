@@ -1,0 +1,21 @@
+{
+  "id" : "25e7ead9-52ac-316d-86a4-ea68eb23f8e9",
+  "request" : {
+    "url" : "/experience/v1/games?season=2019&seasonType=REG&week=6",
+    "method" : "GET"
+  },
+  "response" : {
+    "status" : 200,
+    "bodyFileName" : "body-experience-v1-q7FUH.json",
+    "headers" : {
+      "Content-Type" : "application/json;charset=utf-8",
+      "X-Served-By" : "cache-lax8633-LAX",
+      "X-Cache-Hits" : "0",
+      "X-Timer" : "S1589801447.763709,VS0,VE63",
+      "Cache-Control" : "max-age=30, s-maxage=30",
+      "Date" : "Mon, 18 May 2020 11:30:46 GMT",
+      "X-NFL-APP" : "jarvis"
+    }
+  },
+  "uuid" : "25e7ead9-52ac-316d-86a4-ea68eb23f8e9"
+}

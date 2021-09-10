@@ -1,18 +1,20 @@
-# curl 'https://api.nfl.com/v3/shield/?query=query%7Bviewer%7Bleague%7Bgames(first%3A100%2Cweek_seasonValue%3A2016%2Cweek_seasonType%3AREG%2Cweek_weekValue%3A5%2C)%7Bedges%7Bcursor%20node%7Bid%20esbId%20gameDetailId%20gameTime%20gsisId%20networkChannels%20radioLinks%20ticketUrl%20venue%7BfullName%20city%20state%7DawayTeam%7BnickName%20id%20abbreviation%20franchise%7BcurrentLogo%7Burl%7D%7D%7DhomeTeam%7BnickName%20id%20abbreviation%20franchise%7BcurrentLogo%7Burl%7D%7D%7Dslug%7D%7D%7D%7D%7D%7D&variables=null' -H 'authority: api.nfl.com' -H 'pragma: no-cache' -H 'cache-control: no-cache' -H 'authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1aWQiOm51bGwsInVzZXJuYW1lIjpudWxsLCJkZXZpY2VJZCI6bnVsbCwiY2xpZW50SWQiOiJ5TExiY1p6UWpBb0NBbXVhenVGS0d2T25GUUtneWNJdiIsImFkSWQiOm51bGwsImV4cCI6MTU4NjYyMzYxMywiaWF0IjoxNTg2NjIwMDEzfQ.izaxP0Cvyk6qxY6mJJiNEqLD9GmEbiyfFkIt9Gyks_w' -H 'sec-fetch-dest: empty' -H 'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36' -H 'content-type: application/json' -H 'accept: */*' -H 'origin: https://www.nfl.com' -H 'sec-fetch-site: same-site' -H 'sec-fetch-mode: cors' -H 'referer: https://www.nfl.com/' -H 'accept-language: en-US,en;q=0.9' --compressed
-GET https://api.nfl.com/v3/shield/?query=query%7Bviewer%7Bleague%7Bgames(first%3A100%2Cweek_seasonValue%3A2020%2Cweek_seasonType%3AREG%2Cweek_weekValue%3A1%2C)%7Bedges%7Bnode%7BgameDetailId%20gameTime%20awayTeam%7BnickName%20abbreviation%20%7DhomeTeam%7BnickName%20abbreviation%20%7D%7D%7D%7D%7D%7D%7D&variables=null
-authority: api.nfl.com
-pragma: no-cache
-cache-control: no-cache
-authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1aWQiOm51bGwsInVzZXJuYW1lIjpudWxsLCJkZXZpY2VJZCI6bnVsbCwiY2xpZW50SWQiOiJ5TExiY1p6UWpBb0NBbXVhenVGS0d2T25GUUtneWNJdiIsImFkSWQiOm51bGwsImV4cCI6MTU4OTgwNjcwNCwiaWF0IjoxNTg5ODAzMTA0fQ.dfY60zVRPQLAQLLPMRZgKwZfMDQSrX407k5zaMlX4AA
-sec-fetch-dest: empty
-user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36
-accept: */*
-origin: https://www.nfl.com
-sec-fetch-site: same-site
-sec-fetch-mode: cors
-referer: https://www.nfl.com/
-accept-language: en-US,en;q=0.9
-Content-Type: application/json
+# curl "https://api.nfl.com/experience/v1/games?season=2021&seasonType=REG&week=1" -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0" -H "Accept: */*" -H "Accept-Language: en-US,en;q=0.5" --compressed -H "Referer: https://www.nfl.com/" -H "authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjbGllbnRJZCI6ImU1MzVjN2MwLTgxN2YtNDc3Ni04OTkwLTU2NTU2ZjhiMTkyOCIsImRtYUNvZGUiOiI2MDIiLCJmb3JtRmFjdG9yIjoiREVTS1RPUCIsImlzcyI6Ik5GTCIsImRldmljZUlkIjoiODIzYzg3YjEtOTc0MC00YWVkLTllMWItYzljY2EwZTQ2ZjYwIiwicGxhdGZvcm0iOiJERVNLVE9QIiwicHJvZHVjdE5hbWUiOiJXRUIiLCJjb3VudHJ5Q29kZSI6IlVTIiwicGxhbnMiOlt7InNvdXJjZSI6Ik5GTCIsInBsYW4iOiJmcmVlIiwidHJpYWwiOiJmYWxzZSIsInN0YXR1cyI6IkFDVElWRSIsImV4cGlyYXRpb25EYXRlIjoiMjAyMi0wOS0xMCJ9XSwiY2VsbHVsYXIiOmZhbHNlLCJicm93c2VyIjoiRmlyZWZveCIsIkRpc3BsYXlOYW1lIjoiV0VCX0RFU0tUT1BfREVTS1RPUCIsImx1cmFBcHBLZXkiOiJTWnM1N2RCR1J4Ykw3MjhsVnA3RFlRIiwiZG1hIjoiNjAyIiwiZXhwIjoxNjMxMzExMjk1LCJOb3RlcyI6IiJ9.aTw83bODZakGJBpuI0MY6nYrKTxX5dJq12fbtmD2HIw" -H "Origin: https://www.nfl.com" -H "DNT: 1" -H "Connection: keep-alive" -H "Sec-Fetch-Dest: empty" -H "Sec-Fetch-Mode: cors" -H "Sec-Fetch-Site: same-site" -H "Sec-GPC: 1" -H "Pragma: no-cache" -H "Cache-Control: no-cache" -H "TE: trailers"
+GET https://api.nfl.com/experience/v1/games?season=2021&seasonType=REG&week=1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0
+Accept: */*
+Accept-Language: en-US,en;q=0.5
+Referer: https://www.nfl.com/
+authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJjbGllbnRJZCI6ImU1MzVjN2MwLTgxN2YtNDc3Ni04OTkwLTU2NTU2ZjhiMTkyOCIsImRtYUNvZGUiOiI2MDIiLCJmb3JtRmFjdG9yIjoiREVTS1RPUCIsImlzcyI6Ik5GTCIsImRldmljZUlkIjoiODIzYzg3YjEtOTc0MC00YWVkLTllMWItYzljY2EwZTQ2ZjYwIiwicGxhdGZvcm0iOiJERVNLVE9QIiwicHJvZHVjdE5hbWUiOiJXRUIiLCJjb3VudHJ5Q29kZSI6IlVTIiwicGxhbnMiOlt7InNvdXJjZSI6Ik5GTCIsInBsYW4iOiJmcmVlIiwidHJpYWwiOiJmYWxzZSIsInN0YXR1cyI6IkFDVElWRSIsImV4cGlyYXRpb25EYXRlIjoiMjAyMi0wOS0xMCJ9XSwiY2VsbHVsYXIiOmZhbHNlLCJicm93c2VyIjoiRmlyZWZveCIsIkRpc3BsYXlOYW1lIjoiV0VCX0RFU0tUT1BfREVTS1RPUCIsImx1cmFBcHBLZXkiOiJTWnM1N2RCR1J4Ykw3MjhsVnA3RFlRIiwiZG1hIjoiNjAyIiwiZXhwIjoxNjMxMzExMjk1LCJOb3RlcyI6IiJ9.aTw83bODZakGJBpuI0MY6nYrKTxX5dJq12fbtmD2HIw
+Origin: https://www.nfl.com
+DNT: 1
+Connection: keep-alive
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: same-site
+Sec-GPC: 1
+Pragma: no-cache
+Cache-Control: no-cache
+TE: trailers
 
 ###
 

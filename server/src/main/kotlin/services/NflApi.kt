@@ -6,9 +6,6 @@ import dto.GameDTO
 import dto.WeekDTO
 import dto.nfl.api.game.Details
 import dto.nfl.api.game.GameQueryDTO
-import dto.nfl.api.week.Edge
-import dto.nfl.api.week.Node
-import dto.nfl.api.week.WeekQueryDTO
 import getEnvOrDefault
 import java.io.DataOutputStream
 import java.io.FileNotFoundException
@@ -66,25 +63,27 @@ class NflApi(private val tokenURL: URL, private val apiURL: URL) {
     private fun responseMap(response: String) = ObjectMapper().readValue(response, HashMap::class.java)
 
     fun getWeeks(): List<WeekDTO> {
-        return ArrayList<WeekDTO>(0)
+        return ArrayList(0)
     }
 
     fun getWeek(week: WeekDTO): List<GameDTO> {
         val result = ArrayList<GameDTO>(0)
 
         val stream = createWeekQueryConnection(week).inputStream
-        val response = ObjectMapper().readValue(InputStreamReader(stream).readText(), WeekQueryDTO::class.java)
+        val response = ObjectMapper().readValue(InputStreamReader(stream).readText(), HashMap::class.java)
 
-        for (edge in response.data.viewer.league.games.edges) {
-            val game = buildGameInWeek(edge, week)
-            result.add(game)
+        val games = response["games"] as List<HashMap<String, Any>>
+
+        for (game in games) {
+            val gameDTO = buildGameInWeek(game, week)
+            result.add(gameDTO)
         }
 
         return result
     }
 
     fun getGame(game: GameDTO): GameDTO {
-        if(game.id == null ){
+        if (game.id == null) {
             throw FileNotFoundException("Game ID not defined")
         }
 
@@ -96,10 +95,17 @@ class NflApi(private val tokenURL: URL, private val apiURL: URL) {
         return buildGameResponse(game, details)
     }
 
-    private fun buildGameInWeek(edge: Edge, week: WeekDTO): GameDTO {
-        return GameDTO(formatGameName(edge.node), week.name).apply {
-            id = edge.node.gameDetailId
-            gameTime = OffsetDateTime.parse(edge.node.gameTime)
+    private fun buildGameInWeek(game: HashMap<String, Any>, week: WeekDTO): GameDTO {
+        val detail = game["detail"] as HashMap<String, String>?
+        val parsedId = if(detail == null) {
+            null
+        } else {
+            UUID.fromString(detail["id"])
+        }
+
+        return GameDTO(formatGameName(game), week.name).apply {
+            id = parsedId
+            gameTime = OffsetDateTime.parse(game["time"] as String)
         }
     }
 
@@ -129,10 +135,7 @@ class NflApi(private val tokenURL: URL, private val apiURL: URL) {
 
         val fullApiUrl = URL(
             apiURL,
-            "/v3/shield/?query=query%7Bviewer%7Bleague%7Bgames(first%3A100%2Cweek_seasonValue%3A${season}%2C"
-                    + "week_seasonType%3A${week.weekType}%2Cweek_weekValue%3A${week.week}%2C)%7Bedges%7Bnode%7B"
-                    +"gameDetailId%20gameTime%20awayTeam%7BnickName%20abbreviation%20%7DhomeTeam%7BnickName%20abbreviation%20"
-                    + "%7D%7D%7D%7D%7D%7D%7D&variables=null"
+            "/experience/v1/games?season=${season}&seasonType=${week.weekType}&week=${week.week}"
         )
 
         return connectionWithQueryHeaders(fullApiUrl)
@@ -149,7 +152,9 @@ class NflApi(private val tokenURL: URL, private val apiURL: URL) {
 
     }
 
-    private fun formatGameName(game: Node) = game.awayTeam.abbreviation + "@" + game.homeTeam.abbreviation
+    private fun formatGameName(game: HashMap<String, Any>) =
+        (game["awayTeam"] as HashMap<String, String>)["abbreviation"] +
+                "@" + (game["homeTeam"] as HashMap<String, String>)["abbreviation"]
 
     private fun setCommonHeaders(connection: HttpURLConnection) {
         connection.setRequestProperty("authority", "api.nfl.com")

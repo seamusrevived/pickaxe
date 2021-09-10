@@ -4,7 +4,7 @@ User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:76.0) Gecko/20100101 Fi
 Accept: */*
 Accept-Language: en-US,en;q=0.5
 Referer: https://www.nfl.com/
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1aWQiOm51bGwsInVzZXJuYW1lIjpudWxsLCJkZXZpY2VJZCI6bnVsbCwiY2xpZW50SWQiOiJ5TExiY1p6UWpBb0NBbXVhenVGS0d2T25GUUtneWNJdiIsImFkSWQiOm51bGwsImV4cCI6MTU4OTc1MDQ0NiwiaWF0IjoxNTg5NzQ2ODQ2fQ.aHHZ_IxrCygndFoX7ym5MqJumDmnWwThkqCHblpfyOQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1aWQiOm51bGwsInVzZXJuYW1lIjpudWxsLCJkZXZpY2VJZCI6bnVsbCwiY2xpZW50SWQiOiJ5TExiY1p6UWpBb0NBbXVhenVGS0d2T25GUUtneWNJdiIsImFkSWQiOm51bGwsImV4cCI6MTYzMTI5MzIwMywiaWF0IjoxNjMxMjg5NjAzfQ.7LK5oLdzXndk060LR6fFWeFZjdgxDHtH8Ygmcl-2YCk
 Origin: https://www.nfl.com
 Connection: keep-alive
 DNT: 1
