@@ -253,6 +253,29 @@ class NflApiTest {
         assertNull(result.first().id)
     }
 
+
+    @Test
+    fun `games without time from query do not have time`() {
+        val weekTypeQuery = "REG"
+        val weekQuery = 5
+        val weekName = "Week 5"
+        val week = WeekDTO(weekName).apply {
+            weekType = weekTypeQuery
+            week = weekQuery
+        }
+        val uri = buildRelativeApiWeekQueryUrl(season, weekTypeQuery, weekQuery)
+        handler.setConnection(URL(baseApiUrl, uri), mockApiConnection)
+        val expectedGames = object {
+            val games = listOf(buildGameWithoutTimeOrDetail("GB", "CHI"))
+        }
+        every { mockApiConnection.inputStream } returns ObjectMapper().writeValueAsString(expectedGames)
+            .byteInputStream()
+
+        val result = NflApi(tokenURL, baseApiUrl).getWeek(week)
+
+        assertNull(result.first().gameTime)
+    }
+
     @Test
     fun getWeekGetsGamesFromNFLWithOneGamePreseasonWeek1() {
         val weekTypeQuery = "PRE"
@@ -704,6 +727,20 @@ class NflApiTest {
             }
             var detail = object {
                 var id = id
+            }
+        }
+    }
+
+
+    private fun buildGameWithoutTimeOrDetail(away: String, home: String): Any {
+        return object {
+            var awayTeam = object {
+                var nickName = "Cardinals"
+                var abbreviation = away
+            }
+            var homeTeam = object {
+                var nickName = "49ers"
+                var abbreviation = home
             }
         }
     }

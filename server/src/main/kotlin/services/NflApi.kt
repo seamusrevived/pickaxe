@@ -102,8 +102,16 @@ class NflApi(private val tokenURL: URL, private val apiURL: URL) {
 
         return GameDTO(formatGameName(game), week.name).apply {
             id = extractGameId(game)
-            gameTime = OffsetDateTime.parse(game["time"] as String)
+            gameTime = extractGameTime(game)
         }
+    }
+
+    private fun extractGameTime(game: HashMap<*, *>): OffsetDateTime? {
+        val gameTime = game["time"]
+        if(gameTime != null) {
+            return OffsetDateTime.parse(gameTime as String)
+        }
+        return null
     }
 
     private fun extractGameId(game: HashMap<*, *>): UUID? {
