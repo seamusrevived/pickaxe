@@ -13,8 +13,8 @@ import io.mockk.*
 import org.junit.jupiter.api.Assertions.*
 import services.nflapi.NflApiRepository
 import java.io.*
-import java.text.SimpleDateFormat
 import java.time.*
+import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -32,7 +32,7 @@ class NflApiRepositoryTest {
 
     private val requestOutputStream = ByteArrayOutputStream()
 
-    private val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.000'Z'")
+    private val formatter = DateTimeFormatter.ISO_INSTANT
 
     private val defaultId = UUID.fromString("10012016-1006-0091-2590-6d5ccb310545")
 
@@ -49,8 +49,6 @@ class NflApiRepositoryTest {
 
     @BeforeEach
     fun beforeEach() {
-        formatter.timeZone = TimeZone.getTimeZone("UTC")
-
         handler.setConnection(tokenURL, mockTokenConnection)
         every { mockTokenConnection.requestMethod = "POST" } returns Unit
         every { mockTokenConnection.outputStream } returns requestOutputStream
@@ -197,7 +195,7 @@ class NflApiRepositoryTest {
         assertEquals("ARI@SF", result.first().name)
         assertEquals(weekName, result.first().week)
         assertEquals(defaultId, result.first().id)
-        assertEquals(defaultGameStart, result.first().gameTime)
+        assertEquals(defaultGameStart.toEpochSecond(), result.first().gameTime!!.toEpochSecond())
     }
 
     @Test
@@ -371,7 +369,7 @@ class NflApiRepositoryTest {
         assertEquals(weekName, result[0].week)
         assertEquals("TEN@MIA", result[1].name)
         assertEquals(weekName, result[1].week)
-        assertEquals(defaultGameStart.plusHours(3), result[1].gameTime)
+        assertEquals(defaultGameStart.plusHours(3).toEpochSecond(), result[1].gameTime!!.toEpochSecond())
     }
 
     @Test
@@ -735,7 +733,7 @@ class NflApiRepositoryTest {
     @Suppress("unused")
     private fun buildGame(away: String, home: String, time: OffsetDateTime, id: UUID?): Any {
         return object {
-            var time = time.toString()
+            var time = formatter.format(time)
             var awayTeam = object {
                 var nickName = "Cardinals"
                 var abbreviation = away
