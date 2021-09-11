@@ -6,6 +6,7 @@ import dto.GameDTO
 import dto.WeekDTO
 import services.utils.Details
 import getEnvOrDefault
+import services.utils.GameQuery
 import services.utils.NestedMapUtil
 import java.io.DataOutputStream
 import java.io.FileNotFoundException
@@ -13,7 +14,6 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.SimpleDateFormat
-import java.time.OffsetDateTime
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -62,60 +62,36 @@ class NflApiRepository(private val tokenURL: URL, private val apiURL: URL) {
 
     private fun responseMap(response: String) = ObjectMapper().readValue(response, HashMap::class.java)
 
-    fun getWeek(week: WeekDTO): List<GameDTO> {
+    fun fetchWeek(week: WeekDTO): List<GameDTO> {
+        val games = fetchGamesForWeek(week)
+
         val result = ArrayList<GameDTO>(0)
-
-        val stream = createWeekQueryConnection(week).inputStream
-        val response = responseMap(InputStreamReader(stream).readText())
-
-        val games = response["games"] as? List<*>
-
-        for (game in games!!) {
-            if (game is HashMap<*, *>) {
-                val gameDTO = buildGameInWeek(game, week)
-                result.add(gameDTO)
-            }
+        for (game in games) {
+            val gameDTO = buildGameInWeek(game, week)
+            result.add(gameDTO)
 
         }
         return result
     }
 
-    fun getGame(game: GameDTO): GameDTO {
-        if (game.id == null) {
-            throw FileNotFoundException("Game ID not defined")
-        }
-
-        val stream = createGameQueryConnection(game.id!!).inputStream
-        val responseText = InputStreamReader(stream).readText()
-        val response = responseMap(responseText)
-        val detailsMap = NestedMapUtil.extractValue(response, listOf("data", "viewer", "gameDetailsByIds")) as List<*>
-        val details = Details(detailsMap.first() as HashMap<*, *>)
-        return buildGameResponse(game, details)
+    private fun fetchGamesForWeek(week: WeekDTO): List<GameQuery> {
+        return createWeekQueryConnection(week)
+            .inputStream
+            .let { responseMap(InputStreamReader(it).readText()) }
+            .let { it["games"] as? List<*> }!!
+            .map { game -> GameQuery(game as HashMap<*, *>) }
     }
 
-    private fun buildGameInWeek(game: HashMap<*, *>, week: WeekDTO): GameDTO {
+    private fun buildGameInWeek(game: GameQuery, week: WeekDTO): GameDTO {
 
         return GameDTO(formatGameName(game), week.name).apply {
-            id = NestedMapUtil.extractString(game, listOf("detail", "id"))?.let {
-                UUID.fromString(it)
-            }
-            gameTime = NestedMapUtil.extractString(game, listOf("time"))?.let {
-                OffsetDateTime.parse(it)
-            }
+            id = game.details?.id
+            gameTime = game.time
         }
     }
 
-
-
-    private fun buildGameResponse(game: GameDTO, details: Details): GameDTO {
-        return GameDTO(game.name, game.week).apply {
-            result = details.getOutcome()
-            id = game.id
-            gameTime = game.gameTime
-        }
-    }
-
-
+    private fun formatGameName(game: GameQuery): String =
+        "${game.awayTeam.abbreviation}@${game.homeTeam.abbreviation}"
 
     private fun createWeekQueryConnection(week: WeekDTO): HttpURLConnection {
         val season = getEnvOrDefault("PICKAXE_SEASON", "2019")
@@ -128,6 +104,31 @@ class NflApiRepository(private val tokenURL: URL, private val apiURL: URL) {
         return connectionWithQueryHeaders(fullApiUrl)
     }
 
+
+    fun fetchGame(game: GameDTO): GameDTO {
+        if (game.id == null) {
+            throw FileNotFoundException("Game ID not defined")
+        }
+
+        val details = fetchGameDetailsForId(game.id!!)
+
+        return GameDTO(game.name, game.week).apply {
+            result = details.getOutcome()
+            id = game.id
+            gameTime = game.gameTime
+        }
+    }
+
+    private fun fetchGameDetailsForId(gameId: UUID): Details {
+        val gameQueryDetailsPath = listOf("data", "viewer", "gameDetailsByIds")
+        return createGameQueryConnection(gameId)
+            .inputStream
+            .let { stream -> InputStreamReader(stream).readText() }
+            .let { response -> responseMap(response) }
+            .let { map -> NestedMapUtil.extractValue(map, gameQueryDetailsPath) as List<*> }
+            .let { detailsMap -> Details(detailsMap.first() as HashMap<*, *>) }
+    }
+
     private fun createGameQueryConnection(id: UUID): HttpURLConnection {
         val fullUrl =
             URL(
@@ -137,12 +138,6 @@ class NflApiRepository(private val tokenURL: URL, private val apiURL: URL) {
 
         return connectionWithQueryHeaders(fullUrl)
 
-    }
-
-    private fun formatGameName(game: HashMap<*, *>): String {
-        val awayAbbreviation = (game["awayTeam"] as HashMap<*, *>)["abbreviation"]
-        val homeAbbreviation = (game["homeTeam"] as HashMap<*, *>)["abbreviation"]
-        return "$awayAbbreviation@$homeAbbreviation"
     }
 
     private fun setCommonHeaders(connection: HttpURLConnection) {

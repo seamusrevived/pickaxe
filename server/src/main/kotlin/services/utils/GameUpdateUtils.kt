@@ -18,7 +18,7 @@ class GameUpdateUtils {
         ) {
             var games: List<GameDTO> = ArrayList(0)
             try {
-                games = nflApi.getWeek(week)
+                games = nflApi.fetchWeek(week)
             } catch (e: FileNotFoundException) {
                 println("Week ${week.name} could not be fetched - ${e.message}")
             } catch (e: IOException) {
@@ -68,7 +68,7 @@ class GameUpdateUtils {
 
         private fun updateGameDetails(nflApi: NflApiRepository, baseGame: GameDTO, gameMutator: GameMutator) {
             try {
-                val fetchedGame = nflApi.getGame(baseGame)
+                val fetchedGame = nflApi.fetchGame(baseGame)
                 gameMutator.putInDatabase(fetchedGame)
             } catch (e: FileNotFoundException) {
                 println("Game ${baseGame.week} ${baseGame.name} could not be fetched - ${e.message}")

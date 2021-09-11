@@ -1,5 +1,7 @@
 package services.utils
 
+import java.time.OffsetDateTime
+import java.util.*
 import kotlin.collections.HashMap
 
 
@@ -15,25 +17,26 @@ class GameViewer {
     var gameDetailsByIds: List<Details> = listOf()
 }
 
-class Details {
-    constructor()
-    constructor(map: HashMap<*,*>) {
-        homePointsTotal = NestedMapUtil.extractInt(map, listOf("homePointsTotal"))!!
-        homeTeam = GameTeam(NestedMapUtil.extractString(map, listOf("homeTeam", "abbreviation"))!!)
-        visitorPointsTotal = NestedMapUtil.extractInt(map, listOf("visitorPointsTotal"))!!
-        visitorTeam = GameTeam(NestedMapUtil.extractString(map, listOf("visitorTeam", "abbreviation"))!!)
-        phase = NestedMapUtil.extractString(map, listOf("phase"))!!
-    }
-
+class Details(map: Map<*, *>) {
+    var id: UUID? = null
     var phase: String = ""
     var homePointsTotal: Int = 0
     var visitorPointsTotal: Int = 0
     var visitorTeam = GameTeam()
     var homeTeam = GameTeam()
 
+    init {
+        homePointsTotal = NestedMapUtil.extractInt(map, "homePointsTotal") ?: 0
+        homeTeam = GameTeam(NestedMapUtil.extractString(map, listOf("homeTeam", "abbreviation")) ?: "")
+        visitorPointsTotal = NestedMapUtil.extractInt(map, "visitorPointsTotal") ?: 0
+        visitorTeam = GameTeam(NestedMapUtil.extractString(map, listOf("visitorTeam", "abbreviation")) ?: "")
+        phase = NestedMapUtil.extractString(map, "phase") ?: ""
+        id = NestedMapUtil.extractUUID(map, "id")
+    }
+
+
     fun getOutcome(): String? {
         var result = "TIE"
-
 
         if (!phase.contains("FINAL")) {
             return null
@@ -48,5 +51,20 @@ class Details {
         return result
     }
 }
+
+class GameQuery(map: HashMap<*, *>) {
+    var details: Details?
+    var time: OffsetDateTime? = null
+    var awayTeam: GameTeam
+    var homeTeam: GameTeam
+
+    init {
+        details = NestedMapUtil.extractDetails(map, "detail")
+        time = NestedMapUtil.extractOffsetDateTime(map, "time")
+        awayTeam = GameTeam(NestedMapUtil.extractString(map, listOf("awayTeam", "abbreviation")) ?: "")
+        homeTeam = GameTeam(NestedMapUtil.extractString(map, listOf("homeTeam", "abbreviation")) ?: "")
+    }
+}
+
 
 class GameTeam(var abbreviation: String = "")
