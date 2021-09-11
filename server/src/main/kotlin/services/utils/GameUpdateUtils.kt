@@ -5,7 +5,7 @@ import db.GamesQuery
 import db.WeeksQuery
 import dto.GameDTO
 import dto.WeekDTO
-import services.NflApi
+import services.NflApiRepository
 import java.io.FileNotFoundException
 import java.io.IOException
 
@@ -13,7 +13,7 @@ class GameUpdateUtils {
     companion object {
         fun reloadGamesForWeek(
             week: WeekDTO,
-            nflApi: NflApi,
+            nflApi: NflApiRepository,
             gameMutator: GameMutator
         ) {
             var games: List<GameDTO> = ArrayList(0)
@@ -32,7 +32,7 @@ class GameUpdateUtils {
 
         fun updateDetailsForFinalGame(
             baseGame: GameDTO,
-            nflApi: NflApi,
+            nflApi: NflApiRepository,
             gameMutator: GameMutator
         ) {
             if (baseGame.id == null) {
@@ -66,7 +66,7 @@ class GameUpdateUtils {
 
         private fun gameResultNotRecorded(baseGame: GameDTO) = baseGame.result == null
 
-        private fun updateGameDetails(nflApi: NflApi, baseGame: GameDTO, gameMutator: GameMutator) {
+        private fun updateGameDetails(nflApi: NflApiRepository, baseGame: GameDTO, gameMutator: GameMutator) {
             try {
                 val fetchedGame = nflApi.getGame(baseGame)
                 gameMutator.putInDatabase(fetchedGame)

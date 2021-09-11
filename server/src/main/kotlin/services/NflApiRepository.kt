@@ -17,7 +17,7 @@ import java.time.OffsetDateTime
 import java.util.*
 import kotlin.collections.HashMap
 
-class NflApi(private val tokenURL: URL, private val apiURL: URL) {
+class NflApiRepository(private val tokenURL: URL, private val apiURL: URL) {
     private var _accessToken: String? = null
     var now = { Date() }
 

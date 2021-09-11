@@ -24,7 +24,7 @@ class ServiceRunner {
             "NFL_API_ROOT",
             "http://nfl-wiremock:8080"
         )
-        val nflApi = NflApi(URL("${nflApiRoot}/v1/reroute"), URL(nflApiRoot))
+        val nflApi = NflApiRepository(URL("${nflApiRoot}/v1/reroute"), URL(nflApiRoot))
 
         val vegasPicksApiRoot = getEnvOrDefault(
             "VEGAS_PICKS_URL",
@@ -55,7 +55,7 @@ class ServiceRunner {
         }
     }
 
-    private fun updateGameDetailsForFinalGames(nflApi: NflApi, dbConnection: Connection) {
+    private fun updateGameDetailsForFinalGames(nflApi: NflApiRepository, dbConnection: Connection) {
         WeeksQuery(dbConnection).get().forEach { week ->
             updateDetailsForFinalGamesInWeek(week, dbConnection, nflApi)
         }
@@ -64,14 +64,14 @@ class ServiceRunner {
     private fun updateDetailsForFinalGamesInWeek(
         week: WeekDTO,
         dbConnection: Connection,
-        nflApi: NflApi
+        nflApi: NflApiRepository
     ) {
         return GamesQuery(dbConnection).getGamesForWeek(week.name).forEach { baseGame ->
             updateDetailsForFinalGame(baseGame, nflApi, GameMutator(dbConnection))
         }
     }
 
-    private fun reloadAllWeeks(nflApi: NflApi, dbConnection: Connection) {
+    private fun reloadAllWeeks(nflApi: NflApiRepository, dbConnection: Connection) {
         WeeksQuery(dbConnection).get().forEach { week ->
             reloadGamesForWeek(week, nflApi, GameMutator(dbConnection))
         }

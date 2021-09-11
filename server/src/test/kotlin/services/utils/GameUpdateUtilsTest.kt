@@ -10,7 +10,7 @@ import io.mockk.mockkClass
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import services.NflApi
+import services.NflApiRepository
 import services.utils.GameUpdateUtils.Companion.hasImmanentGamesMissingId
 import services.utils.GameUpdateUtils.Companion.reloadGamesForWeek
 import services.utils.GameUpdateUtils.Companion.updateDetailsForFinalGame
@@ -29,7 +29,7 @@ class GameUpdateUtilsTest {
         spread = -7.0
     }
 
-    private val mockNflApi = mockkClass(NflApi::class)
+    private val mockNflApi = mockkClass(NflApiRepository::class)
     private val mockMutator = mockkClass(GameMutator::class)
 
     @Test
