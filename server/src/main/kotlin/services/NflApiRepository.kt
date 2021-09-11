@@ -120,15 +120,34 @@ class NflApiRepository(private val tokenURL: URL, private val apiURL: URL) {
 
     private fun buildGameResponse(game: GameDTO, details: Details): GameDTO {
         return GameDTO(game.name, game.week).apply {
-            if (details.phase.contains("FINAL")) {
-                result = determineOutcome(details)
-            }
+            result = determineOutcome(details)
             id = game.id
             gameTime = game.gameTime
         }
     }
 
-    private fun determineOutcome(details: Details): String {
+    private fun determineOutcome(details: HashMap<*, *>): String {
+        var result = "TIE"
+        val homePointsTotal = extractStringFromNestedMap(details, listOf("homePointsTotal"))!!.toInt()
+        val homeAbbreviation = extractStringFromNestedMap(details, listOf("homeTeam", "abbreviation"))!!
+        val visitorPointsTotal = extractStringFromNestedMap(details, listOf("visitorPointsTotal"))!!.toInt()
+        val visitorAbbreviation = extractStringFromNestedMap(details, listOf("visitorTeam", "abbreviation"))!!
+
+
+        if (homePointsTotal > visitorPointsTotal) {
+            result = homeAbbreviation
+        }
+        if (homePointsTotal < visitorPointsTotal) {
+            result = visitorAbbreviation
+        }
+        return result
+    }
+
+    private fun determineOutcome(details: Details): String? {
+        if (!details.phase.contains("FINAL")) {
+            return null
+        }
+
         var result = "TIE"
         if (details.homePointsTotal > details.visitorPointsTotal) {
             result = details.homeTeam.abbreviation

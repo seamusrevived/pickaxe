@@ -213,7 +213,7 @@ class NflApiRepositoryTest {
 
         @Suppress("unused")
         val expectedGames = object {
-            val games = listOf(object {
+            val games: List<Any> = listOf(object {
                 var time = defaultGameStart.toString()
                 var awayTeam = object {
                     var nickName = "Cardinals"
@@ -272,7 +272,7 @@ class NflApiRepositoryTest {
 
         @Suppress("unused")
         val expectedGames = object {
-            val games = listOf(object {
+            val games: List<Any> = listOf(object {
                 var awayTeam = object {
                     var nickName = "Cardinals"
                     var abbreviation = "GB"
