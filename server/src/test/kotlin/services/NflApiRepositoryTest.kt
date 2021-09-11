@@ -172,16 +172,6 @@ class NflApiRepositoryTest {
         assertEquals(expectedToken, token)
     }
 
-    @Test
-    fun getsWeeksFromDatabaseWithOneWeek() {
-        val expectedWeeks = ArrayList<WeekDTO>(0)
-
-        val nflService = NflApiRepository(URL("http://url"), baseApiUrl)
-
-        val weeks = nflService.getWeeks()
-
-        assertEquals(expectedWeeks, weeks)
-    }
 
     @Test
     fun getWeekGetsGamesFromNFLWithOneGameRegularWeek5() {
@@ -220,8 +210,20 @@ class NflApiRepositoryTest {
         }
         val uri = buildRelativeApiWeekQueryUrl(season, weekTypeQuery, weekQuery)
         handler.setConnection(URL(baseApiUrl, uri), mockApiConnection)
+
+        @Suppress("unused")
         val expectedGames = object {
-            val games = listOf(buildGameWithoutDetail("GB", "CHI", defaultGameStart))
+            val games = listOf(object {
+                var time = defaultGameStart.toString()
+                var awayTeam = object {
+                    var nickName = "Cardinals"
+                    var abbreviation = "GB"
+                }
+                var homeTeam = object {
+                    var nickName = "49ers"
+                    var abbreviation = "CHI"
+                }
+            })
         }
         every { mockApiConnection.inputStream } returns ObjectMapper().writeValueAsString(expectedGames)
             .byteInputStream()
@@ -242,6 +244,8 @@ class NflApiRepositoryTest {
         }
         val uri = buildRelativeApiWeekQueryUrl(season, weekTypeQuery, weekQuery)
         handler.setConnection(URL(baseApiUrl, uri), mockApiConnection)
+
+        @Suppress("unused")
         val expectedGames = object {
             val games = listOf(buildGame("GB", "CHI", defaultGameStart, null))
         }
@@ -265,8 +269,19 @@ class NflApiRepositoryTest {
         }
         val uri = buildRelativeApiWeekQueryUrl(season, weekTypeQuery, weekQuery)
         handler.setConnection(URL(baseApiUrl, uri), mockApiConnection)
+
+        @Suppress("unused")
         val expectedGames = object {
-            val games = listOf(buildGameWithoutTimeOrDetail("GB", "CHI"))
+            val games = listOf(object {
+                var awayTeam = object {
+                    var nickName = "Cardinals"
+                    var abbreviation = "GB"
+                }
+                var homeTeam = object {
+                    var nickName = "49ers"
+                    var abbreviation = "CHI"
+                }
+            })
         }
         every { mockApiConnection.inputStream } returns ObjectMapper().writeValueAsString(expectedGames)
             .byteInputStream()
@@ -336,6 +351,7 @@ class NflApiRepositoryTest {
             week = weekQuery
         }
         handler.setConnection(URL(baseApiUrl, uri), mockApiConnection)
+        @Suppress("unused")
         val expectedGames = object {
             var games: List<Any> = listOf(
                 buildGame("CHI", "IND", defaultGameStart, defaultId),
@@ -714,6 +730,7 @@ class NflApiRepositoryTest {
             }
         }
 
+    @Suppress("unused")
     private fun buildGame(away: String, home: String, time: OffsetDateTime, id: UUID?): Any {
         return object {
             var time = time.toString()
@@ -731,33 +748,6 @@ class NflApiRepositoryTest {
         }
     }
 
-
-    private fun buildGameWithoutTimeOrDetail(away: String, home: String): Any {
-        return object {
-            var awayTeam = object {
-                var nickName = "Cardinals"
-                var abbreviation = away
-            }
-            var homeTeam = object {
-                var nickName = "49ers"
-                var abbreviation = home
-            }
-        }
-    }
-
-    private fun buildGameWithoutDetail(away: String, home: String, time: OffsetDateTime): Any {
-        return object {
-            var time = time.toString()
-            var awayTeam = object {
-                var nickName = "Cardinals"
-                var abbreviation = away
-            }
-            var homeTeam = object {
-                var nickName = "49ers"
-                var abbreviation = home
-            }
-        }
-    }
 
     @Suppress("unused")
     private fun buildTokenResponse(expectedToken: String): String {

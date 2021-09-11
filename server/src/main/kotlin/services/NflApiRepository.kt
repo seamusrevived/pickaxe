@@ -62,26 +62,21 @@ class NflApiRepository(private val tokenURL: URL, private val apiURL: URL) {
 
     private fun responseMap(response: String) = ObjectMapper().readValue(response, HashMap::class.java)
 
-    fun getWeeks(): List<WeekDTO> {
-        return ArrayList(0)
-    }
-
     fun getWeek(week: WeekDTO): List<GameDTO> {
         val result = ArrayList<GameDTO>(0)
 
         val stream = createWeekQueryConnection(week).inputStream
-        val response = ObjectMapper().readValue(InputStreamReader(stream).readText(), HashMap::class.java)
+        val response = responseMap(InputStreamReader(stream).readText())
 
         val games = response["games"] as? List<*>
 
         for (game in games!!) {
-            if(game is HashMap<*, *>) {
+            if (game is HashMap<*, *>) {
                 val gameDTO = buildGameInWeek(game, week)
                 result.add(gameDTO)
             }
 
         }
-
         return result
     }
 
@@ -101,27 +96,26 @@ class NflApiRepository(private val tokenURL: URL, private val apiURL: URL) {
     private fun buildGameInWeek(game: HashMap<*, *>, week: WeekDTO): GameDTO {
 
         return GameDTO(formatGameName(game), week.name).apply {
-            id = extractGameId(game)
-            gameTime = extractGameTime(game)
+            id = extractStringFromNestedMap(game, listOf("detail", "id"))?.let {
+                UUID.fromString(it)
+            }
+            gameTime = extractStringFromNestedMap(game, listOf("time"))?.let {
+                OffsetDateTime.parse(it)
+            }
         }
     }
 
-    private fun extractGameTime(game: HashMap<*, *>): OffsetDateTime? {
-        val gameTime = game["time"]
-        if(gameTime != null) {
-            return OffsetDateTime.parse(gameTime as String)
-        }
-        return null
-    }
+    private fun extractStringFromNestedMap(map: HashMap<*, *>, keys: List<String>): String? {
+        val leadingKey = keys.first()
+        val remainingKeys = keys.drop(1)
 
-    private fun extractGameId(game: HashMap<*, *>): UUID? {
-        val detail = game["detail"] as HashMap<*, *>?
-        val parsedId = if (detail == null || detail["id"] !is String) {
-            null
-        } else {
-            UUID.fromString(detail["id"] as String)
+        return map[leadingKey]?.let {
+            if (remainingKeys.isEmpty()) {
+                it as String?
+            } else {
+                extractStringFromNestedMap(it as HashMap<*, *>, remainingKeys)
+            }
         }
-        return parsedId
     }
 
     private fun buildGameResponse(game: GameDTO, details: Details): GameDTO {
