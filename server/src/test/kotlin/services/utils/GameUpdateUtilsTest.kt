@@ -10,7 +10,7 @@ import io.mockk.mockkClass
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import services.NflApiRepository
+import services.nflapi.NflApiRepository
 import services.utils.GameUpdateUtils.Companion.hasImmanentGamesMissingId
 import services.utils.GameUpdateUtils.Companion.reloadGamesForWeek
 import services.utils.GameUpdateUtils.Companion.updateDetailsForFinalGame
@@ -39,13 +39,13 @@ class GameUpdateUtilsTest {
         val week = WeekDTO("Week 7")
         val dbGame = defaultGame
 
-        every { mockNflApi.fetchWeek(any()) } returns listOf(dbGame)
+        every { mockNflApi.fetchGamesForWeek(any()) } returns listOf(dbGame)
 
         every { mockMutator.putInDatabase(game = capture(gamesToDb)) } returns Unit
 
         reloadGamesForWeek(week, mockNflApi, mockMutator)
 
-        verify(exactly = 1) { mockNflApi.fetchWeek(week) }
+        verify(exactly = 1) { mockNflApi.fetchGamesForWeek(week) }
         Assertions.assertEquals(1, gamesToDb.size)
         val gameToDb = gamesToDb[0]
         Assertions.assertEquals(dbGame.name, gameToDb.name)
@@ -69,12 +69,12 @@ class GameUpdateUtilsTest {
             spread = 15.0
         }
 
-        every { mockNflApi.fetchWeek(any()) } returns listOf(dbGame1, dbGame2)
+        every { mockNflApi.fetchGamesForWeek(any()) } returns listOf(dbGame1, dbGame2)
         every { mockMutator.putInDatabase(game = capture(gamesToDb)) } returns Unit
 
         reloadGamesForWeek(week, mockNflApi, mockMutator)
 
-        verify(exactly = 1) { mockNflApi.fetchWeek(week) }
+        verify(exactly = 1) { mockNflApi.fetchGamesForWeek(week) }
         Assertions.assertEquals(2, gamesToDb.size)
         val secondGameToDb = gamesToDb[1]
         Assertions.assertEquals(dbGame2.name, secondGameToDb.name)
@@ -86,7 +86,7 @@ class GameUpdateUtilsTest {
 
     @Test
     fun loadInfoForWeekAndFileNotFoundDoesNothing() {
-        every { mockNflApi.fetchWeek(any()) } throws FileNotFoundException("Mock file not found exception")
+        every { mockNflApi.fetchGamesForWeek(any()) } throws FileNotFoundException("Mock file not found exception")
         every { mockMutator.putInDatabase(any()) } returns Unit
 
         reloadGamesForWeek(WeekDTO("Week -1"), mockNflApi, mockMutator)
@@ -96,7 +96,7 @@ class GameUpdateUtilsTest {
 
     @Test
     fun loadInfoForWeekAndIOExceptionDoesNothing() {
-        every { mockNflApi.fetchWeek(any()) } throws IOException("Mock io exception")
+        every { mockNflApi.fetchGamesForWeek(any()) } throws IOException("Mock io exception")
         every { mockMutator.putInDatabase(any()) } returns Unit
 
         reloadGamesForWeek(WeekDTO("Week -1"), mockNflApi, mockMutator)
@@ -112,12 +112,12 @@ class GameUpdateUtilsTest {
             id = UUID.randomUUID()
             spread = -7.0
         }
-        every { mockNflApi.fetchGame(baseGame) } returns defaultGame
+        every { mockNflApi.fetchGameWithResult(baseGame) } returns defaultGame
         every { mockMutator.putInDatabase(any()) } returns Unit
 
         updateDetailsForFinalGame(baseGame, mockNflApi, mockMutator)
 
-        verify(exactly = 1) { mockNflApi.fetchGame(baseGame) }
+        verify(exactly = 1) { mockNflApi.fetchGameWithResult(baseGame) }
         verify(exactly = 1) { mockMutator.putInDatabase(defaultGame) }
     }
 
@@ -129,12 +129,12 @@ class GameUpdateUtilsTest {
             id = null
             spread = -7.0
         }
-        every { mockNflApi.fetchGame(any()) } returns defaultGame
+        every { mockNflApi.fetchGameWithResult(any()) } returns defaultGame
         every { mockMutator.putInDatabase(any()) } returns Unit
 
         updateDetailsForFinalGame(baseGame, mockNflApi, mockMutator)
 
-        verify(exactly = 0) { mockNflApi.fetchGame(any()) }
+        verify(exactly = 0) { mockNflApi.fetchGameWithResult(any()) }
         verify(exactly = 0) { mockMutator.putInDatabase(any()) }
     }
 
@@ -146,12 +146,12 @@ class GameUpdateUtilsTest {
             id = UUID.randomUUID()
             spread = -7.0
         }
-        every { mockNflApi.fetchGame(any()) } returns baseGame
+        every { mockNflApi.fetchGameWithResult(any()) } returns baseGame
         every { mockMutator.putInDatabase(any()) } returns Unit
 
         updateDetailsForFinalGame(baseGame, mockNflApi, mockMutator)
 
-        verify(exactly = 0) { mockNflApi.fetchGame(any()) }
+        verify(exactly = 0) { mockNflApi.fetchGameWithResult(any()) }
         verify(exactly = 0) { mockMutator.putInDatabase(any()) }
     }
 
@@ -163,12 +163,12 @@ class GameUpdateUtilsTest {
             id = UUID.randomUUID()
             spread = -7.0
         }
-        every { mockNflApi.fetchGame(any()) } returns baseGame
+        every { mockNflApi.fetchGameWithResult(any()) } returns baseGame
         every { mockMutator.putInDatabase(any()) } returns Unit
 
         updateDetailsForFinalGame(baseGame, mockNflApi, mockMutator)
 
-        verify(exactly = 0) { mockNflApi.fetchGame(any()) }
+        verify(exactly = 0) { mockNflApi.fetchGameWithResult(any()) }
         verify(exactly = 0) { mockMutator.putInDatabase(any()) }
     }
 
@@ -180,12 +180,12 @@ class GameUpdateUtilsTest {
             id = UUID.randomUUID()
             spread = -7.0
         }
-        every { mockNflApi.fetchGame(any()) } returns baseGame
+        every { mockNflApi.fetchGameWithResult(any()) } returns baseGame
         every { mockMutator.putInDatabase(any()) } returns Unit
 
         updateDetailsForFinalGame(baseGame, mockNflApi, mockMutator)
 
-        verify(exactly = 0) { mockNflApi.fetchGame(any()) }
+        verify(exactly = 0) { mockNflApi.fetchGameWithResult(any()) }
         verify(exactly = 0) { mockMutator.putInDatabase(any()) }
     }
 
@@ -197,11 +197,11 @@ class GameUpdateUtilsTest {
             id = UUID.randomUUID()
             spread = -7.0
         }
-        every { mockNflApi.fetchGame(any()) } throws FileNotFoundException("Mock failure")
+        every { mockNflApi.fetchGameWithResult(any()) } throws FileNotFoundException("Mock failure")
 
         updateDetailsForFinalGame(baseGame, mockNflApi, mockMutator)
 
-        verify(exactly = 1) { mockNflApi.fetchGame(any()) }
+        verify(exactly = 1) { mockNflApi.fetchGameWithResult(any()) }
         verify(exactly = 0) { mockMutator.putInDatabase(any()) }
     }
 

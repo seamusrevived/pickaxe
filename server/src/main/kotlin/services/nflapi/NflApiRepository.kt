@@ -1,12 +1,9 @@
-package services
+package services.nflapi
 
 import com.auth0.jwt.JWT
 import com.fasterxml.jackson.databind.ObjectMapper
 import dto.GameDTO
 import dto.WeekDTO
-import services.utils.Details
-import getEnvOrDefault
-import services.utils.GameQuery
 import services.utils.NestedMapUtil
 import java.io.DataOutputStream
 import java.io.FileNotFoundException
@@ -17,7 +14,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.HashMap
 
-class NflApiRepository(private val tokenURL: URL, private val apiURL: URL) {
+class NflApiRepository(private val tokenURL: URL, private val apiURL: URL, private val season: String) {
+
     private var _accessToken: String? = null
     var now = { Date() }
 
@@ -62,40 +60,19 @@ class NflApiRepository(private val tokenURL: URL, private val apiURL: URL) {
 
     private fun responseMap(response: String) = ObjectMapper().readValue(response, HashMap::class.java)
 
-    fun fetchWeek(week: WeekDTO): List<GameDTO> {
-        val games = fetchGamesForWeek(week)
+    fun fetchGamesForWeek(week: WeekDTO): List<GameDTO> =
+        fetchGameResponsesForWeek(week)
+            .map { response -> buildGame(week, response) }
 
-        val result = ArrayList<GameDTO>(0)
-        for (game in games) {
-            val gameDTO = buildGameInWeek(game, week)
-            result.add(gameDTO)
-
-        }
-        return result
-    }
-
-    private fun fetchGamesForWeek(week: WeekDTO): List<GameQuery> {
+    private fun fetchGameResponsesForWeek(week: WeekDTO): List<GameResponse> {
         return createWeekQueryConnection(week)
             .inputStream
             .let { responseMap(InputStreamReader(it).readText()) }
-            .let { it["games"] as? List<*> }!!
-            .map { game -> GameQuery(game as HashMap<*, *>) }
+            .let { NestedMapUtil.extractList(it, "games") }!!
+            .map { game -> GameResponse(game as HashMap<*, *>) }
     }
-
-    private fun buildGameInWeek(game: GameQuery, week: WeekDTO): GameDTO {
-
-        return GameDTO(formatGameName(game), week.name).apply {
-            id = game.details?.id
-            gameTime = game.time
-        }
-    }
-
-    private fun formatGameName(game: GameQuery): String =
-        "${game.awayTeam.abbreviation}@${game.homeTeam.abbreviation}"
 
     private fun createWeekQueryConnection(week: WeekDTO): HttpURLConnection {
-        val season = getEnvOrDefault("PICKAXE_SEASON", "2019")
-
         val fullApiUrl = URL(
             apiURL,
             "/experience/v1/games?season=${season}&seasonType=${week.weekType}&week=${week.week}"
@@ -104,8 +81,18 @@ class NflApiRepository(private val tokenURL: URL, private val apiURL: URL) {
         return connectionWithQueryHeaders(fullApiUrl)
     }
 
+    private fun buildGame(week: WeekDTO, game: GameResponse): GameDTO {
+        return GameDTO(formatGameName(game), week.name).apply {
+            id = game.details?.id
+            gameTime = game.time
+        }
+    }
 
-    fun fetchGame(game: GameDTO): GameDTO {
+    private fun formatGameName(game: GameResponse): String =
+        "${game.awayTeam.abbreviation}@${game.homeTeam.abbreviation}"
+
+
+    fun fetchGameWithResult(game: GameDTO): GameDTO {
         if (game.id == null) {
             throw FileNotFoundException("Game ID not defined")
         }

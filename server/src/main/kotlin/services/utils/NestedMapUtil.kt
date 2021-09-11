@@ -1,5 +1,6 @@
 package services.utils
 
+import services.nflapi.Details
 import java.time.OffsetDateTime
 import java.util.*
 
@@ -8,8 +9,11 @@ class NestedMapUtil {
         private fun extractMap(map: Map<*,*>, key: String): Map<*,*>? =
             extractValue(map, listOf(key)) as? Map<*, *>
 
+        fun extractList(map: Map<*,*>, key: String): List<*>? =
+            extractValue(map, listOf(key)) as? List<*>
+
         fun extractDetails(map: Map<*,*>, key:String): Details? =
-            extractMap(map, key)?.let{Details(it)}
+            extractMap(map, key)?.let{ Details(it) }
 
         fun extractString(map: Map<*, *>, key: String): String? =
             extractValue(map, listOf(key)) as? String

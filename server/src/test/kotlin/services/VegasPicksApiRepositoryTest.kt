@@ -5,6 +5,7 @@ import io.mockk.mockkClass
 import io.mockk.slot
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import services.vegasapi.VegasPicksApiRepository
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL

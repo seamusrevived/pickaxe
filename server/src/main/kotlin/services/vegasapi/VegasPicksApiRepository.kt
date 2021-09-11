@@ -1,4 +1,4 @@
-package services
+package services.vegasapi
 
 import dto.PickWithSpreadDTO
 import org.jsoup.Jsoup

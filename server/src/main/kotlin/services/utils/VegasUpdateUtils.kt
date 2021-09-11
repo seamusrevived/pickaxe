@@ -6,7 +6,7 @@ import db.GamesQuery
 import db.UpdatePickMutator
 import dto.*
 import org.slf4j.LoggerFactory
-import services.VegasPicksApiRepository
+import services.vegasapi.VegasPicksApiRepository
 import services.utils.UpdateUtils.Companion.hasGameStartInXMinutes
 
 class VegasUpdateUtils {

@@ -6,7 +6,7 @@ import io.mockk.every
 import io.mockk.mockkClass
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import services.VegasPicksApiRepository
+import services.vegasapi.VegasPicksApiRepository
 import services.utils.VegasUpdateUtils.Companion.updateVegasPicks
 import java.time.OffsetDateTime
 import java.util.*

@@ -6,11 +6,13 @@ import getEnvOrDefault
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import services.nflapi.NflApiRepository
 import services.utils.GameUpdateUtils.Companion.hasImmanentGamesMissingId
 import services.utils.GameUpdateUtils.Companion.reloadGamesForWeek
 import services.utils.GameUpdateUtils.Companion.updateDetailsForFinalGame
 import services.utils.RngUpdateUtils
 import services.utils.VegasUpdateUtils
+import services.vegasapi.VegasPicksApiRepository
 import java.net.URL
 import java.sql.Connection
 
@@ -24,7 +26,9 @@ class ServiceRunner {
             "NFL_API_ROOT",
             "http://nfl-wiremock:8080"
         )
-        val nflApi = NflApiRepository(URL("${nflApiRoot}/v1/reroute"), URL(nflApiRoot))
+        val nflApi = NflApiRepository(
+            URL("${nflApiRoot}/v1/reroute"), URL(nflApiRoot), getEnvOrDefault("PICKAXE_SEASON", "2019")
+        )
 
         val vegasPicksApiRoot = getEnvOrDefault(
             "VEGAS_PICKS_URL",

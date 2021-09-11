@@ -1,21 +1,7 @@
-package services.utils
+package services.nflapi
 
-import java.time.OffsetDateTime
+import services.utils.NestedMapUtil
 import java.util.*
-import kotlin.collections.HashMap
-
-
-class GameQueryDTO {
-    var data = GameData()
-}
-
-class GameData {
-    var viewer = GameViewer()
-}
-
-class GameViewer {
-    var gameDetailsByIds: List<Details> = listOf()
-}
 
 class Details(map: Map<*, *>) {
     var id: UUID? = null
@@ -23,7 +9,9 @@ class Details(map: Map<*, *>) {
     var homePointsTotal: Int = 0
     var visitorPointsTotal: Int = 0
     var visitorTeam = GameTeam()
+
     var homeTeam = GameTeam()
+
 
     init {
         homePointsTotal = NestedMapUtil.extractInt(map, "homePointsTotal") ?: 0
@@ -33,7 +21,6 @@ class Details(map: Map<*, *>) {
         phase = NestedMapUtil.extractString(map, "phase") ?: ""
         id = NestedMapUtil.extractUUID(map, "id")
     }
-
 
     fun getOutcome(): String? {
         var result = "TIE"
@@ -51,20 +38,3 @@ class Details(map: Map<*, *>) {
         return result
     }
 }
-
-class GameQuery(map: HashMap<*, *>) {
-    var details: Details?
-    var time: OffsetDateTime? = null
-    var awayTeam: GameTeam
-    var homeTeam: GameTeam
-
-    init {
-        details = NestedMapUtil.extractDetails(map, "detail")
-        time = NestedMapUtil.extractOffsetDateTime(map, "time")
-        awayTeam = GameTeam(NestedMapUtil.extractString(map, listOf("awayTeam", "abbreviation")) ?: "")
-        homeTeam = GameTeam(NestedMapUtil.extractString(map, listOf("homeTeam", "abbreviation")) ?: "")
-    }
-}
-
-
-class GameTeam(var abbreviation: String = "")

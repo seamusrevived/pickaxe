@@ -11,7 +11,7 @@ import dto.GameDTO
 import dto.WeekDTO
 import io.mockk.*
 import org.junit.jupiter.api.Assertions.*
-import services.utils.*
+import services.nflapi.NflApiRepository
 import java.io.*
 import java.text.SimpleDateFormat
 import java.time.*
@@ -42,6 +42,7 @@ class NflApiRepositoryTest {
         ZoneOffset.of("-0500")
     )
 
+    @Suppress("unused")
     private val defaultGames = object {
         var games: List<Any> = listOf(buildGame("ARI", "SF", defaultGameStart, defaultId))
     }
@@ -189,7 +190,7 @@ class NflApiRepositoryTest {
         every { mockApiConnection.inputStream } returns ObjectMapper().writeValueAsString(expectedGames)
             .byteInputStream()
 
-        val result = NflApiRepository(tokenURL, baseApiUrl).fetchWeek(week)
+        val result = NflApiRepository(tokenURL, baseApiUrl, season.toString()).fetchGamesForWeek(week)
 
         verify(exactly = 1) { mockApiConnection.inputStream }
         assertEquals(1, result.size)
@@ -228,7 +229,7 @@ class NflApiRepositoryTest {
         every { mockApiConnection.inputStream } returns ObjectMapper().writeValueAsString(expectedGames)
             .byteInputStream()
 
-        val result = NflApiRepository(tokenURL, baseApiUrl).fetchWeek(week)
+        val result = NflApiRepository(tokenURL, baseApiUrl, season.toString()).fetchGamesForWeek(week)
 
         assertNull(result.first().id)
     }
@@ -252,7 +253,7 @@ class NflApiRepositoryTest {
         every { mockApiConnection.inputStream } returns ObjectMapper().writeValueAsString(expectedGames)
             .byteInputStream()
 
-        val result = NflApiRepository(tokenURL, baseApiUrl).fetchWeek(week)
+        val result = NflApiRepository(tokenURL, baseApiUrl, season.toString()).fetchGamesForWeek(week)
 
         assertNull(result.first().id)
     }
@@ -286,7 +287,7 @@ class NflApiRepositoryTest {
         every { mockApiConnection.inputStream } returns ObjectMapper().writeValueAsString(expectedGames)
             .byteInputStream()
 
-        val result = NflApiRepository(tokenURL, baseApiUrl).fetchWeek(week)
+        val result = NflApiRepository(tokenURL, baseApiUrl, season.toString()).fetchGamesForWeek(week)
 
         assertNull(result.first().gameTime)
     }
@@ -307,7 +308,7 @@ class NflApiRepositoryTest {
         every { mockApiConnection.inputStream } returns ObjectMapper().writeValueAsString(expectedGames)
             .byteInputStream()
 
-        val result = NflApiRepository(tokenURL, baseApiUrl).fetchWeek(week)
+        val result = NflApiRepository(tokenURL, baseApiUrl, season.toString()).fetchGamesForWeek(week)
 
         verify(exactly = 1) { mockApiConnection.inputStream }
         assertEquals(1, result.size)
@@ -331,7 +332,7 @@ class NflApiRepositoryTest {
         val expectedGames = defaultGames
         every { mockConnection.inputStream } returns ObjectMapper().writeValueAsString(expectedGames).byteInputStream()
 
-        val result = NflApiRepository(tokenURL, differentBaseUrl).fetchWeek(week)
+        val result = NflApiRepository(tokenURL, differentBaseUrl, season.toString()).fetchGamesForWeek(week)
 
         verify(exactly = 1) { mockConnection.inputStream }
         assertEquals(1, result.size)
@@ -362,7 +363,7 @@ class NflApiRepositoryTest {
         every { mockApiConnection.inputStream } returns ObjectMapper().writeValueAsString(expectedGames)
             .byteInputStream()
 
-        val result = NflApiRepository(tokenURL, baseApiUrl).fetchWeek(week)
+        val result = NflApiRepository(tokenURL, baseApiUrl, season.toString()).fetchGamesForWeek(week)
 
         verify(exactly = 1) { mockApiConnection.inputStream }
         assertEquals(2, result.size)
@@ -386,7 +387,7 @@ class NflApiRepositoryTest {
         every { mockApiConnection.inputStream } returns
                 ObjectMapper().writeValueAsString(defaultGames).byteInputStream()
 
-        NflApiRepository(tokenURL, baseApiUrl).fetchWeek(week)
+        NflApiRepository(tokenURL, baseApiUrl, season.toString()).fetchGamesForWeek(week)
 
         val properties = ArrayList<String>(5).apply {
             add("authority")
@@ -414,7 +415,26 @@ class NflApiRepositoryTest {
             week = 3
         }
 
-        NflApiRepository(tokenURL, baseApiUrl).fetchWeek(week)
+        NflApiRepository(tokenURL, baseApiUrl, season.toString()).fetchGamesForWeek(week)
+
+        verify { mockApiConnection.setRequestProperty("authorization", "Bearer $token") }
+    }
+
+    @Test
+    fun `weekRequest for 2020 season HasBearerTokenSet`() {
+        val expectedSeason = 2020
+        val uri = buildRelativeApiWeekQueryUrl(expectedSeason, "REG", 3)
+        handler.setConnection(URL(baseApiUrl, uri), mockApiConnection)
+        val token = generateExpiringToken(1)
+        every { mockTokenConnection.inputStream } returns buildByteStreamResponse(token)
+        every { mockApiConnection.inputStream } returns ObjectMapper().writeValueAsString(defaultGames)
+            .byteInputStream()
+        val week = WeekDTO("Week 3").apply {
+            weekType = "REG"
+            week = 3
+        }
+
+        NflApiRepository(tokenURL, baseApiUrl, expectedSeason.toString()).fetchGamesForWeek(week)
 
         verify { mockApiConnection.setRequestProperty("authorization", "Bearer $token") }
     }
@@ -440,7 +460,7 @@ class NflApiRepositoryTest {
             id = UUID.fromString(gameUuid)
         }
 
-        val result: GameDTO = NflApiRepository(tokenURL, baseApiUrl).fetchGame(gameDTO)
+        val result: GameDTO = NflApiRepository(tokenURL, baseApiUrl, season.toString()).fetchGameWithResult(gameDTO)
 
         assertEquals("CHI", result.result)
     }
@@ -456,7 +476,7 @@ class NflApiRepositoryTest {
             id = UUID.fromString(gameUuid)
         }
 
-        val result: GameDTO = NflApiRepository(tokenURL, baseApiUrl).fetchGame(gameDTO)
+        val result: GameDTO = NflApiRepository(tokenURL, baseApiUrl, season.toString()).fetchGameWithResult(gameDTO)
 
         assertEquals(gameUuid, result.id.toString())
     }
@@ -477,7 +497,7 @@ class NflApiRepositoryTest {
             )
         }
 
-        val result: GameDTO = NflApiRepository(tokenURL, baseApiUrl).fetchGame(gameDTO)
+        val result: GameDTO = NflApiRepository(tokenURL, baseApiUrl, season.toString()).fetchGameWithResult(gameDTO)
 
         assertEquals(gameDTO.gameTime, result.gameTime)
     }
@@ -494,7 +514,7 @@ class NflApiRepositoryTest {
         }
 
         assertThrows(FileNotFoundException::class.java) {
-            NflApiRepository(tokenURL, baseApiUrl).fetchGame(gameDTO)
+            NflApiRepository(tokenURL, baseApiUrl, season.toString()).fetchGameWithResult(gameDTO)
         }
     }
 
@@ -517,7 +537,7 @@ class NflApiRepositoryTest {
             id = UUID.fromString(gameUuid)
         }
 
-        val result: GameDTO = NflApiRepository(tokenURL, baseApiUrl).fetchGame(gameDTO)
+        val result: GameDTO = NflApiRepository(tokenURL, baseApiUrl, season.toString()).fetchGameWithResult(gameDTO)
 
         assertEquals("CHI", result.result)
     }
@@ -544,7 +564,7 @@ class NflApiRepositoryTest {
             id = UUID.fromString(gameUuid)
         }
 
-        val result: GameDTO = NflApiRepository(tokenURL, baseApiUrl).fetchGame(gameDTO)
+        val result: GameDTO = NflApiRepository(tokenURL, baseApiUrl, season.toString()).fetchGameWithResult(gameDTO)
 
         assertEquals(result.name, gameDTO.name)
         assertEquals(result.week, gameDTO.week)
@@ -570,7 +590,7 @@ class NflApiRepositoryTest {
             id = UUID.fromString(gameUuid)
         }
 
-        val result: GameDTO = NflApiRepository(tokenURL, baseApiUrl).fetchGame(gameDTO)
+        val result: GameDTO = NflApiRepository(tokenURL, baseApiUrl, season.toString()).fetchGameWithResult(gameDTO)
 
         assertEquals("TIE", result.result)
     }
@@ -593,7 +613,7 @@ class NflApiRepositoryTest {
             .byteInputStream()
 
         val gameDTO = defaultGameDTO(gameUuid)
-        val result: GameDTO = NflApiRepository(tokenURL, baseApiUrl).fetchGame(gameDTO)
+        val result: GameDTO = NflApiRepository(tokenURL, baseApiUrl, season.toString()).fetchGameWithResult(gameDTO)
 
         assertEquals(result.name, gameDTO.name)
         assertEquals(result.week, gameDTO.week)
@@ -609,7 +629,7 @@ class NflApiRepositoryTest {
         every { mockApiConnection.inputStream } returns
                 ObjectMapper().writeValueAsString(defaultGame()).byteInputStream()
 
-        NflApiRepository(tokenURL, baseApiUrl).fetchGame(defaultGameDTO(gameUuid))
+        NflApiRepository(tokenURL, baseApiUrl, season.toString()).fetchGameWithResult(defaultGameDTO(gameUuid))
 
         val properties = ArrayList<String>(5).apply {
             add("authority")
@@ -636,7 +656,7 @@ class NflApiRepositoryTest {
             .byteInputStream()
 
         val gameDTO = defaultGameDTO(gameUuid)
-        NflApiRepository(tokenURL, baseApiUrl).fetchGame(gameDTO)
+        NflApiRepository(tokenURL, baseApiUrl, season.toString()).fetchGameWithResult(gameDTO)
 
         verify { mockApiConnection.setRequestProperty("authorization", "Bearer $token") }
     }
@@ -648,7 +668,7 @@ class NflApiRepositoryTest {
     }
 
 
-    private fun defaultGame(): GameQueryDTO {
+    private fun defaultGame(): Any {
 
         val details: Map<String, Any> = mapOf(
             "phase" to "In progress",
@@ -661,13 +681,15 @@ class NflApiRepositoryTest {
         return buildGameResponseFromDetails(details)
     }
 
-    private fun buildGameResponseFromDetails(details: Map<String, Any>): GameQueryDTO {
-        val game = baseGameQueryDTO.apply {
-            data.viewer.gameDetailsByIds = listOf(
-                Details(details)
-            )
+    @Suppress("unused")
+    private fun buildGameResponseFromDetails(details: Map<String, Any>): Any {
+        return object {
+            val data = object {
+                val viewer = object {
+                    val gameDetailsByIds = listOf(details)
+                }
+            }
         }
-        return game
     }
 
     private fun buildGameQueryUrl(gameUuid: String) =
@@ -682,7 +704,7 @@ class NflApiRepositoryTest {
     }
 
     private fun nflServiceWithFixedTime(url: URL, token: String? = null): NflApiRepository {
-        val service = NflApiRepository(url, baseApiUrl).apply {
+        val service = NflApiRepository(url, baseApiUrl, season.toString()).apply {
             now = absoluteTime
         }
         if (token != null) {
@@ -709,17 +731,6 @@ class NflApiRepositoryTest {
     }
 
     private fun buildByteStreamResponse(expectedToken: String) = buildTokenResponse(expectedToken).byteInputStream()
-
-    private val baseGameQueryDTO: GameQueryDTO
-        get() {
-            return GameQueryDTO().apply {
-                data = GameData().apply {
-                    viewer = GameViewer().apply {
-                        gameDetailsByIds = ArrayList(0)
-                    }
-                }
-            }
-        }
 
     @Suppress("unused")
     private fun buildGame(away: String, home: String, time: OffsetDateTime, id: UUID?): Any {

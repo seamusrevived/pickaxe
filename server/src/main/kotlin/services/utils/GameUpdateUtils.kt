@@ -5,7 +5,7 @@ import db.GamesQuery
 import db.WeeksQuery
 import dto.GameDTO
 import dto.WeekDTO
-import services.NflApiRepository
+import services.nflapi.NflApiRepository
 import java.io.FileNotFoundException
 import java.io.IOException
 
@@ -18,7 +18,7 @@ class GameUpdateUtils {
         ) {
             var games: List<GameDTO> = ArrayList(0)
             try {
-                games = nflApi.fetchWeek(week)
+                games = nflApi.fetchGamesForWeek(week)
             } catch (e: FileNotFoundException) {
                 println("Week ${week.name} could not be fetched - ${e.message}")
             } catch (e: IOException) {
@@ -68,8 +68,8 @@ class GameUpdateUtils {
 
         private fun updateGameDetails(nflApi: NflApiRepository, baseGame: GameDTO, gameMutator: GameMutator) {
             try {
-                val fetchedGame = nflApi.fetchGame(baseGame)
-                gameMutator.putInDatabase(fetchedGame)
+                val gameWithResult = nflApi.fetchGameWithResult(baseGame)
+                gameMutator.putInDatabase(gameWithResult)
             } catch (e: FileNotFoundException) {
                 println("Game ${baseGame.week} ${baseGame.name} could not be fetched - ${e.message}")
             }
