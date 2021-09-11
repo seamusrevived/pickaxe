@@ -1,23 +1,21 @@
-package services
+package services.nflapi
 
 import com.auth0.jwt.JWT
 import com.fasterxml.jackson.databind.ObjectMapper
 import dto.GameDTO
 import dto.WeekDTO
-import dto.nfl.api.game.Details
-import dto.nfl.api.game.GameQueryDTO
-import getEnvOrDefault
+import services.utils.NestedMapUtil
 import java.io.DataOutputStream
 import java.io.FileNotFoundException
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.SimpleDateFormat
-import java.time.OffsetDateTime
 import java.util.*
 import kotlin.collections.HashMap
 
-class NflApi(private val tokenURL: URL, private val apiURL: URL) {
+class NflApiRepository(private val tokenURL: URL, private val apiURL: URL, private val season: String) {
+
     private var _accessToken: String? = null
     var now = { Date() }
 
@@ -62,90 +60,60 @@ class NflApi(private val tokenURL: URL, private val apiURL: URL) {
 
     private fun responseMap(response: String) = ObjectMapper().readValue(response, HashMap::class.java)
 
-    fun getWeeks(): List<WeekDTO> {
-        return ArrayList(0)
-    }
+    fun fetchGamesForWeek(week: WeekDTO): List<GameDTO> =
+        fetchGameResponsesForWeek(week)
+            .map { response -> buildGame(week, response) }
 
-    fun getWeek(week: WeekDTO): List<GameDTO> {
-        val result = ArrayList<GameDTO>(0)
-
-        val stream = createWeekQueryConnection(week).inputStream
-        val response = ObjectMapper().readValue(InputStreamReader(stream).readText(), HashMap::class.java)
-
-        val games = response["games"] as? List<*>
-
-        for (game in games!!) {
-            if(game is HashMap<*, *>) {
-                val gameDTO = buildGameInWeek(game, week)
-                result.add(gameDTO)
-            }
-
-        }
-
-        return result
-    }
-
-    fun getGame(game: GameDTO): GameDTO {
-        if (game.id == null) {
-            throw FileNotFoundException("Game ID not defined")
-        }
-
-        val stream = createGameQueryConnection(game.id!!).inputStream
-        val responseText = InputStreamReader(stream).readText()
-        val response = ObjectMapper().readValue(responseText, GameQueryDTO::class.java)
-        val details = response.data.viewer.gameDetailsByIds.first()
-
-        return buildGameResponse(game, details)
-    }
-
-    private fun buildGameInWeek(game: HashMap<*, *>, week: WeekDTO): GameDTO {
-
-        return GameDTO(formatGameName(game), week.name).apply {
-            id = extractGameId(game)
-            gameTime = OffsetDateTime.parse(game["time"] as String)
-        }
-    }
-
-    private fun extractGameId(game: HashMap<*, *>): UUID? {
-        val detail = game["detail"] as HashMap<*, *>?
-        val parsedId = if (detail == null || detail["id"] !is String) {
-            null
-        } else {
-            UUID.fromString(detail["id"] as String)
-        }
-        return parsedId
-    }
-
-    private fun buildGameResponse(game: GameDTO, details: Details): GameDTO {
-        return GameDTO(game.name, game.week).apply {
-            if (details.phase.contains("FINAL")) {
-                result = determineOutcome(details)
-            }
-            id = game.id
-            gameTime = game.gameTime
-        }
-    }
-
-    private fun determineOutcome(details: Details): String {
-        var result = "TIE"
-        if (details.homePointsTotal > details.visitorPointsTotal) {
-            result = details.homeTeam.abbreviation
-        }
-        if (details.homePointsTotal < details.visitorPointsTotal) {
-            result = details.visitorTeam.abbreviation
-        }
-        return result
+    private fun fetchGameResponsesForWeek(week: WeekDTO): List<GameResponse> {
+        return createWeekQueryConnection(week)
+            .inputStream
+            .let { responseMap(InputStreamReader(it).readText()) }
+            .let { NestedMapUtil.extractList(it, "games") }!!
+            .map { game -> GameResponse(game as HashMap<*, *>) }
     }
 
     private fun createWeekQueryConnection(week: WeekDTO): HttpURLConnection {
-        val season = getEnvOrDefault("PICKAXE_SEASON", "2019")
-
         val fullApiUrl = URL(
             apiURL,
             "/experience/v1/games?season=${season}&seasonType=${week.weekType}&week=${week.week}"
         )
 
         return connectionWithQueryHeaders(fullApiUrl)
+    }
+
+    private fun buildGame(week: WeekDTO, game: GameResponse): GameDTO {
+        return GameDTO(formatGameName(game), week.name).apply {
+            id = game.details?.id
+            gameTime = game.time
+        }
+    }
+
+    private fun formatGameName(game: GameResponse): String =
+        "${game.awayTeam.abbreviation}@${game.homeTeam.abbreviation}"
+
+
+    fun fetchGameWithResult(game: GameDTO): GameDTO {
+        if (game.id == null) {
+            throw FileNotFoundException("Game ID not defined")
+        }
+
+        val details = fetchGameDetailsForId(game.id!!)
+
+        return GameDTO(game.name, game.week).apply {
+            result = details.getOutcome()
+            id = game.id
+            gameTime = game.gameTime
+        }
+    }
+
+    private fun fetchGameDetailsForId(gameId: UUID): Details {
+        val gameQueryDetailsPath = listOf("data", "viewer", "gameDetailsByIds")
+        return createGameQueryConnection(gameId)
+            .inputStream
+            .let { stream -> InputStreamReader(stream).readText() }
+            .let { response -> responseMap(response) }
+            .let { map -> NestedMapUtil.extractValue(map, gameQueryDetailsPath) as List<*> }
+            .let { detailsMap -> Details(detailsMap.first() as HashMap<*, *>) }
     }
 
     private fun createGameQueryConnection(id: UUID): HttpURLConnection {
@@ -157,12 +125,6 @@ class NflApi(private val tokenURL: URL, private val apiURL: URL) {
 
         return connectionWithQueryHeaders(fullUrl)
 
-    }
-
-    private fun formatGameName(game: HashMap<*, *>): String {
-        val awayAbbreviation = (game["awayTeam"] as HashMap<*, *>)["abbreviation"]
-        val homeAbbreviation = (game["homeTeam"] as HashMap<*, *>)["abbreviation"]
-        return "$awayAbbreviation@$homeAbbreviation"
     }
 
     private fun setCommonHeaders(connection: HttpURLConnection) {

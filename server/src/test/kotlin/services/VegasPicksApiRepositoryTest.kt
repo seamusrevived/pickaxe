@@ -5,11 +5,12 @@ import io.mockk.mockkClass
 import io.mockk.slot
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import services.vegasapi.VegasPicksApiRepository
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 
-class VegasPicksApiTest {
+class VegasPicksApiRepositoryTest {
     private val sampleRow = buildSampleRow(
         VegasData(
             "Pittsburgh",
@@ -36,7 +37,7 @@ class VegasPicksApiTest {
     fun urlOpenConnectionIOExceptionReturnsNoPicks() {
         val mockUrl = mockkClass(URL::class)
         every { mockUrl.openConnection() } throws IOException("Mock io exception")
-        val picksApi = VegasPicksApi(mockUrl)
+        val picksApi = VegasPicksApiRepository(mockUrl)
 
         val picks = picksApi.getVegasPicks()
 
@@ -46,7 +47,7 @@ class VegasPicksApiTest {
     @Test
     fun `getVegasPicks uses user agent`() {
         every { mockPicksConnection.inputStream } returns "".byteInputStream()
-        val picksApi = VegasPicksApi(picksUrl)
+        val picksApi = VegasPicksApiRepository(picksUrl)
 
         picksApi.getVegasPicks()
 
@@ -59,7 +60,7 @@ class VegasPicksApiTest {
     @Test
     fun getInputStreamIOExceptionReturnsNoPicks() {
         every { mockPicksConnection.inputStream } throws IOException("Mock io exception")
-        val picksApi = VegasPicksApi(picksUrl)
+        val picksApi = VegasPicksApiRepository(picksUrl)
 
         val picks = picksApi.getVegasPicks()
 
@@ -69,7 +70,7 @@ class VegasPicksApiTest {
     @Test
     fun getVegasPickWithNotDataReturnsNoGames() {
         every { mockPicksConnection.inputStream } returns "".byteInputStream()
-        val picksApi = VegasPicksApi(picksUrl)
+        val picksApi = VegasPicksApiRepository(picksUrl)
 
         val picks = picksApi.getVegasPicks()
 
@@ -93,7 +94,7 @@ class VegasPicksApiTest {
             )
         ).byteInputStream()
 
-        val picks = VegasPicksApi(picksUrl).getVegasPicks()
+        val picks = VegasPicksApiRepository(picksUrl).getVegasPicks()
 
         assertEquals(2, picks.size)
         assertEquals("PIT@DAL", picks[0].game)
@@ -104,7 +105,7 @@ class VegasPicksApiTest {
     fun getVegasPickWithSampleRowPitAtDalReturnsGame() {
         every { mockPicksConnection.inputStream } returns sampleRow.byteInputStream()
 
-        val picks = VegasPicksApi(picksUrl).getVegasPicks()
+        val picks = VegasPicksApiRepository(picksUrl).getVegasPicks()
 
         assertEquals(1, picks.size)
         val pick = picks.first()
@@ -123,7 +124,7 @@ class VegasPicksApiTest {
             )
         ).byteInputStream()
 
-        val picks = VegasPicksApi(picksUrl).getVegasPicks()
+        val picks = VegasPicksApiRepository(picksUrl).getVegasPicks()
 
         val pick = picks.first()
         assertEquals("PIT", pick.pick)
@@ -139,7 +140,7 @@ class VegasPicksApiTest {
             )
         ).byteInputStream()
 
-        val picks = VegasPicksApi(picksUrl).getVegasPicks()
+        val picks = VegasPicksApiRepository(picksUrl).getVegasPicks()
 
         val pick = picks.first()
         assertEquals(1.0, pick.spread)
@@ -155,7 +156,7 @@ class VegasPicksApiTest {
             )
         ).byteInputStream()
 
-        val picks = VegasPicksApi(picksUrl).getVegasPicks()
+        val picks = VegasPicksApiRepository(picksUrl).getVegasPicks()
 
         val pick = picks.first()
         assertEquals(3.5, pick.spread)
@@ -171,7 +172,7 @@ class VegasPicksApiTest {
             )
         ).byteInputStream()
 
-        val picks = VegasPicksApi(picksUrl).getVegasPicks()
+        val picks = VegasPicksApiRepository(picksUrl).getVegasPicks()
 
         assertEquals(1, picks.size)
         val pick = picks.first()
@@ -190,7 +191,7 @@ class VegasPicksApiTest {
             )
         ).byteInputStream()
 
-        val picks = VegasPicksApi(picksUrl).getVegasPicks()
+        val picks = VegasPicksApiRepository(picksUrl).getVegasPicks()
 
         assertEquals(-1.5, picks.first().spread)
     }
@@ -205,7 +206,7 @@ class VegasPicksApiTest {
             )
         ).byteInputStream()
 
-        val picks = VegasPicksApi(picksUrl).getVegasPicks()
+        val picks = VegasPicksApiRepository(picksUrl).getVegasPicks()
 
         assertEquals(0.0, picks.first().spread)
     }
@@ -220,7 +221,7 @@ class VegasPicksApiTest {
             )
         ).byteInputStream()
 
-        val picks = VegasPicksApi(picksUrl).getVegasPicks()
+        val picks = VegasPicksApiRepository(picksUrl).getVegasPicks()
 
         assertEquals("TIE", picks.first().pick)
     }
@@ -235,7 +236,7 @@ class VegasPicksApiTest {
             )
         ).byteInputStream()
 
-        val picks = VegasPicksApi(picksUrl).getVegasPicks()
+        val picks = VegasPicksApiRepository(picksUrl).getVegasPicks()
 
         assertEquals(0, picks.size)
     }
@@ -250,7 +251,7 @@ class VegasPicksApiTest {
             )
         ).byteInputStream()
 
-        val picks = VegasPicksApi(picksUrl).getVegasPicks()
+        val picks = VegasPicksApiRepository(picksUrl).getVegasPicks()
 
         assertEquals(0, picks.size)
     }
@@ -266,7 +267,7 @@ class VegasPicksApiTest {
             )
         ).byteInputStream()
 
-        val picks = VegasPicksApi(picksUrl).getVegasPicks()
+        val picks = VegasPicksApiRepository(picksUrl).getVegasPicks()
 
         assertEquals(0, picks.size)
     }
@@ -293,7 +294,7 @@ class VegasPicksApiTest {
                     "</tr>\n"
         ).byteInputStream()
 
-        val picks = VegasPicksApi(picksUrl).getVegasPicks()
+        val picks = VegasPicksApiRepository(picksUrl).getVegasPicks()
 
         assertEquals(0, picks.size)
     }
@@ -321,7 +322,7 @@ class VegasPicksApiTest {
                     "</tr>\n"
         ).byteInputStream()
 
-        val picks = VegasPicksApi(picksUrl).getVegasPicks()
+        val picks = VegasPicksApiRepository(picksUrl).getVegasPicks()
 
         assertEquals(0, picks.size)
     }

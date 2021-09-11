@@ -6,11 +6,13 @@ import getEnvOrDefault
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import services.nflapi.NflApiRepository
 import services.utils.GameUpdateUtils.Companion.hasImmanentGamesMissingId
 import services.utils.GameUpdateUtils.Companion.reloadGamesForWeek
 import services.utils.GameUpdateUtils.Companion.updateDetailsForFinalGame
 import services.utils.RngUpdateUtils
 import services.utils.VegasUpdateUtils
+import services.vegasapi.VegasPicksApiRepository
 import java.net.URL
 import java.sql.Connection
 
@@ -24,13 +26,15 @@ class ServiceRunner {
             "NFL_API_ROOT",
             "http://nfl-wiremock:8080"
         )
-        val nflApi = NflApi(URL("${nflApiRoot}/v1/reroute"), URL(nflApiRoot))
+        val nflApi = NflApiRepository(
+            URL("${nflApiRoot}/v1/reroute"), URL(nflApiRoot), getEnvOrDefault("PICKAXE_SEASON", "2019")
+        )
 
         val vegasPicksApiRoot = getEnvOrDefault(
             "VEGAS_PICKS_URL",
             "http://nfl-wiremock:8080/nfl/odds/las-vegas/"
         )
-        val vegasPicksApi = VegasPicksApi(URL(vegasPicksApiRoot))
+        val vegasPicksApi = VegasPicksApiRepository(URL(vegasPicksApiRoot))
 
         val dbConnection = PickaxeDB().getDBConnection()
 
@@ -55,7 +59,7 @@ class ServiceRunner {
         }
     }
 
-    private fun updateGameDetailsForFinalGames(nflApi: NflApi, dbConnection: Connection) {
+    private fun updateGameDetailsForFinalGames(nflApi: NflApiRepository, dbConnection: Connection) {
         WeeksQuery(dbConnection).get().forEach { week ->
             updateDetailsForFinalGamesInWeek(week, dbConnection, nflApi)
         }
@@ -64,14 +68,14 @@ class ServiceRunner {
     private fun updateDetailsForFinalGamesInWeek(
         week: WeekDTO,
         dbConnection: Connection,
-        nflApi: NflApi
+        nflApi: NflApiRepository
     ) {
         return GamesQuery(dbConnection).getGamesForWeek(week.name).forEach { baseGame ->
             updateDetailsForFinalGame(baseGame, nflApi, GameMutator(dbConnection))
         }
     }
 
-    private fun reloadAllWeeks(nflApi: NflApi, dbConnection: Connection) {
+    private fun reloadAllWeeks(nflApi: NflApiRepository, dbConnection: Connection) {
         WeeksQuery(dbConnection).get().forEach { week ->
             reloadGamesForWeek(week, nflApi, GameMutator(dbConnection))
         }
@@ -87,7 +91,7 @@ class ServiceRunner {
         )
     }
 
-    private fun updateVegasPicksForCurrentWeek(dbConnection: Connection, vegasPicksApi: VegasPicksApi) {
+    private fun updateVegasPicksForCurrentWeek(dbConnection: Connection, vegasPicksApi: VegasPicksApiRepository) {
         VegasUpdateUtils.updateVegasPicks(
             CurrentWeekQuery(WeeksQuery(dbConnection), GamesQuery(dbConnection)),
             GamesQuery(dbConnection),

@@ -6,7 +6,7 @@ import db.GamesQuery
 import db.UpdatePickMutator
 import dto.*
 import org.slf4j.LoggerFactory
-import services.VegasPicksApi
+import services.vegasapi.VegasPicksApiRepository
 import services.utils.UpdateUtils.Companion.hasGameStartInXMinutes
 
 class VegasUpdateUtils {
@@ -22,7 +22,7 @@ class VegasUpdateUtils {
             gamesQuery: GamesQuery,
             gameMutator: GameMutator,
             pickMutator: UpdatePickMutator,
-            vegasPicksApi: VegasPicksApi
+            vegasPicksApi: VegasPicksApiRepository
         ) {
             val currentWeekString = currentWeekQuery.getCurrentWeek().name
 

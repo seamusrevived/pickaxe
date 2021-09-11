@@ -1,4 +1,4 @@
-package services
+package services.vegasapi
 
 import dto.PickWithSpreadDTO
 import org.jsoup.Jsoup
@@ -11,8 +11,8 @@ import java.net.URL
 import java.util.NoSuchElementException
 import java.util.stream.IntStream.range
 
-class VegasPicksApi(private val url: URL) {
-    private val logger: org.slf4j.Logger = LoggerFactory.getLogger(VegasPicksApi::class.toString())
+class VegasPicksApiRepository(private val url: URL) {
+    private val logger: org.slf4j.Logger = LoggerFactory.getLogger(VegasPicksApiRepository::class.toString())
 
     fun getVegasPicks(): List<PickWithSpreadDTO> {
         val response: String
