@@ -9,9 +9,9 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.fasterxml.jackson.databind.ObjectMapper
 import dto.GameDTO
 import dto.WeekDTO
-import dto.nfl.api.game.*
 import io.mockk.*
 import org.junit.jupiter.api.Assertions.*
+import services.utils.*
 import java.io.*
 import java.text.SimpleDateFormat
 import java.time.*

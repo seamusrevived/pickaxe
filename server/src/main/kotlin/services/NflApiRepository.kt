@@ -4,9 +4,9 @@ import com.auth0.jwt.JWT
 import com.fasterxml.jackson.databind.ObjectMapper
 import dto.GameDTO
 import dto.WeekDTO
-import dto.nfl.api.game.Details
-import dto.nfl.api.game.GameQueryDTO
+import services.utils.Details
 import getEnvOrDefault
+import services.utils.NestedMapUtil
 import java.io.DataOutputStream
 import java.io.FileNotFoundException
 import java.io.InputStreamReader
@@ -87,76 +87,35 @@ class NflApiRepository(private val tokenURL: URL, private val apiURL: URL) {
 
         val stream = createGameQueryConnection(game.id!!).inputStream
         val responseText = InputStreamReader(stream).readText()
-        val response = ObjectMapper().readValue(responseText, GameQueryDTO::class.java)
-        val details = response.data.viewer.gameDetailsByIds.first()
-
+        val response = responseMap(responseText)
+        val detailsMap = NestedMapUtil.extractValue(response, listOf("data", "viewer", "gameDetailsByIds")) as List<*>
+        val details = Details(detailsMap.first() as HashMap<*, *>)
         return buildGameResponse(game, details)
     }
 
     private fun buildGameInWeek(game: HashMap<*, *>, week: WeekDTO): GameDTO {
 
         return GameDTO(formatGameName(game), week.name).apply {
-            id = extractStringFromNestedMap(game, listOf("detail", "id"))?.let {
+            id = NestedMapUtil.extractString(game, listOf("detail", "id"))?.let {
                 UUID.fromString(it)
             }
-            gameTime = extractStringFromNestedMap(game, listOf("time"))?.let {
+            gameTime = NestedMapUtil.extractString(game, listOf("time"))?.let {
                 OffsetDateTime.parse(it)
             }
         }
     }
 
-    private fun extractStringFromNestedMap(map: HashMap<*, *>, keys: List<String>): String? {
-        val leadingKey = keys.first()
-        val remainingKeys = keys.drop(1)
 
-        return map[leadingKey]?.let {
-            if (remainingKeys.isEmpty()) {
-                it as String?
-            } else {
-                extractStringFromNestedMap(it as HashMap<*, *>, remainingKeys)
-            }
-        }
-    }
 
     private fun buildGameResponse(game: GameDTO, details: Details): GameDTO {
         return GameDTO(game.name, game.week).apply {
-            result = determineOutcome(details)
+            result = details.getOutcome()
             id = game.id
             gameTime = game.gameTime
         }
     }
 
-    private fun determineOutcome(details: HashMap<*, *>): String {
-        var result = "TIE"
-        val homePointsTotal = extractStringFromNestedMap(details, listOf("homePointsTotal"))!!.toInt()
-        val homeAbbreviation = extractStringFromNestedMap(details, listOf("homeTeam", "abbreviation"))!!
-        val visitorPointsTotal = extractStringFromNestedMap(details, listOf("visitorPointsTotal"))!!.toInt()
-        val visitorAbbreviation = extractStringFromNestedMap(details, listOf("visitorTeam", "abbreviation"))!!
 
-
-        if (homePointsTotal > visitorPointsTotal) {
-            result = homeAbbreviation
-        }
-        if (homePointsTotal < visitorPointsTotal) {
-            result = visitorAbbreviation
-        }
-        return result
-    }
-
-    private fun determineOutcome(details: Details): String? {
-        if (!details.phase.contains("FINAL")) {
-            return null
-        }
-
-        var result = "TIE"
-        if (details.homePointsTotal > details.visitorPointsTotal) {
-            result = details.homeTeam.abbreviation
-        }
-        if (details.homePointsTotal < details.visitorPointsTotal) {
-            result = details.visitorTeam.abbreviation
-        }
-        return result
-    }
 
     private fun createWeekQueryConnection(week: WeekDTO): HttpURLConnection {
         val season = getEnvOrDefault("PICKAXE_SEASON", "2019")

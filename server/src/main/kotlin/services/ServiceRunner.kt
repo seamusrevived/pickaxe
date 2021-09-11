@@ -30,7 +30,7 @@ class ServiceRunner {
             "VEGAS_PICKS_URL",
             "http://nfl-wiremock:8080/nfl/odds/las-vegas/"
         )
-        val vegasPicksApi = VegasPicksApi(URL(vegasPicksApiRoot))
+        val vegasPicksApi = VegasPicksApiRepository(URL(vegasPicksApiRoot))
 
         val dbConnection = PickaxeDB().getDBConnection()
 
@@ -87,7 +87,7 @@ class ServiceRunner {
         )
     }
 
-    private fun updateVegasPicksForCurrentWeek(dbConnection: Connection, vegasPicksApi: VegasPicksApi) {
+    private fun updateVegasPicksForCurrentWeek(dbConnection: Connection, vegasPicksApi: VegasPicksApiRepository) {
         VegasUpdateUtils.updateVegasPicks(
             CurrentWeekQuery(WeeksQuery(dbConnection), GamesQuery(dbConnection)),
             GamesQuery(dbConnection),

@@ -6,7 +6,7 @@ import io.mockk.every
 import io.mockk.mockkClass
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import services.VegasPicksApi
+import services.VegasPicksApiRepository
 import services.utils.VegasUpdateUtils.Companion.updateVegasPicks
 import java.time.OffsetDateTime
 import java.util.*
@@ -17,7 +17,7 @@ class VegasUpdateUtilsTest {
     private val mockGamesQuery = mockkClass(GamesQuery::class)
     private val mockPickMutator = mockkClass(UpdatePickMutator::class)
     private val mockGameMutator = mockkClass(GameMutator::class)
-    private val mockVegasPicksApi = mockkClass(VegasPicksApi::class)
+    private val mockVegasPicksApi = mockkClass(VegasPicksApiRepository::class)
 
     private val mutatorUser = mutableListOf<UserDTO>()
     private val mutatorWeek = mutableListOf<WeekDTO>()
